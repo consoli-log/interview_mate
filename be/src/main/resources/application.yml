@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: Be
+  config:
+    import:
+      - config/application-database.yml
+      - config/application-security.yml
