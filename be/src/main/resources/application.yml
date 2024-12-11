@@ -5,3 +5,4 @@ spring:
     import:
       - config/application-database.yml
       - config/application-security.yml
+      - config/application-openai.yml
