@@ -3,6 +3,6 @@ spring:
     name: Be
   config:
     import:
+      - config/application-api.yml
       - config/application-database.yml
       - config/application-security.yml
-      - config/application-openai.yml
