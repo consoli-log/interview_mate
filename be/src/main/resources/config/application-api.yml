@@ -1,0 +1,13 @@
+gemini:
+   api:
+      key: ${GEMINI_KEY}
+      url: ${GEMINI_URL}
+
+springdoc:
+   api-docs:
+      path: /v3/api-docs
+   swagger-ui:
+      path: /swagger-ui.html
+      operationsSorter: method
+      tagsSorter: alpha
+   enable-spring-security: true
