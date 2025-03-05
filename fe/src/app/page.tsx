@@ -2,7 +2,12 @@
 import { useState } from "react";
 import { Menu, X, Search } from "lucide-react";
 import { Layout } from "@/layouts/Layout";
-import { Button, Input, Sidebar } from "@/components";
+import { Input, Sidebar } from "@/components";
+import GoogleLoginButton from "@/components/Auth/GoogleLoginButton";
+import KakaoLoginButton from "@/components/Auth/KakaoLoginButton";
+import Button from "@/components/common/Button/Button";
+import LoginButton from "@/components/Header/LoginButton";
+import SidebarButton from "@/components/Sidebar/SidebarButton";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(true);
@@ -18,28 +23,6 @@ export default function Home() {
       onToggle={() => setIsOpen(!isOpen)}
       sidebar={({ isOpen, toggleSidebar }) => (
         <div className="flex flex-col h-full">
-          <Button
-            variant="outline"
-            className={`
-              w-16 h-16 rounded-none border-none
-              ${isOpen ? "w-full" : "w-16"}
-              transition-all duration-300 ease
-            `}
-            onClick={toggleSidebar}
-            icon={
-              isOpen ? (
-                <X
-                  size={20}
-                  className="text-gray-600 transition-transform duration-200"
-                />
-              ) : (
-                <Menu
-                  size={20}
-                  className="text-gray-600 transition-transform duration-200"
-                />
-              )
-            }
-          />
           <div
             className={`
               flex flex-col
@@ -76,9 +59,8 @@ export default function Home() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">user님, 안녕하세요</h1>
         <Input placeholder="포트폴리오를 입력해요" className="mb-4" />
-        <Button variant="primary" size="md">
-          저장하기
-        </Button>
+        <Button>f</Button> 
+        <SidebarButton></SidebarButton>
       </div>
     </Layout>
   );
