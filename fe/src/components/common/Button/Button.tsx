@@ -23,10 +23,10 @@ export default function Button({
     variantClasses = "bg-gray-200 text-gray-500 cursor-not-allowed";
   } else if (variant === "primary") {
     variantClasses =
-      "bg-yellow-300 hover:bg-yellow-400 active:bg-yellow-500 text-black font-bold";
+      "bg-yellow-200 hover:bg-yellow-300 active:bg-yellow-100 text-black-100 font-bold";
   } else if (variant === "secondary") {
     variantClasses =
-      "bg-white hover:bg-gray-100 active:bg-gray-200 text-black font-bold border border-gray-300";
+      "bg-white-200 hover:bg-gray-300 active:bg-gray-100 text-black-100 font-bold border border-gray-200";
   }
 
   return (
