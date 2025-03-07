@@ -1,19 +1,23 @@
 import React, {
   useState,
   forwardRef,
-  InputHTMLAttributes,
+  TextareaHTMLAttributes,
   ReactNode,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 import UploadButton from "./UploadButton";
 import ProgressBar from "./ProgressBar";
 
-export type InputWithUploadProgressState = "default" | "focused" | "disabled";
+export type TextAreaWithUploadProgressState =
+  | "default"
+  | "focused"
+  | "disabled";
 export type FeedbackLevel = "low" | "medium" | "high" | "none";
 
-export interface InputWithUploadProgressProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size"> {
+export interface TextAreaWithUploadProgressProps
+  extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "size"> {
   className?: string;
   uploadButtonVariant?: "primary" | "secondary" | "ghost";
   disabled?: boolean;
@@ -23,9 +27,11 @@ export interface InputWithUploadProgressProps
   mediumThreshold?: number;
   highThreshold?: number;
   customRightElement?: ReactNode;
+  rows?: number;
+  maxRows?: number;
 }
 
-const STATE_STYLES: Record<InputWithUploadProgressState, string> = {
+const STATE_STYLES: Record<TextAreaWithUploadProgressState, string> = {
   default: "border-gray-200",
   focused: "border-yellow-200",
   disabled: "bg-gray-50 border-gray-200",
@@ -51,9 +57,9 @@ const FEEDBACK_INFO: Record<FeedbackLevel, { message: string; color: string }> =
     },
   };
 
-const InputWithUploadProgress = forwardRef<
-  HTMLInputElement,
-  InputWithUploadProgressProps
+const TextAreaWithUploadProgress = forwardRef<
+  HTMLTextAreaElement,
+  TextAreaWithUploadProgressProps
 >(
   (
     {
@@ -67,99 +73,147 @@ const InputWithUploadProgress = forwardRef<
       mediumThreshold = 50,
       highThreshold = 100,
       customRightElement,
+      rows = 3,
+      maxRows = 10,
+      value: externalValue,
+      onChange,
+      onFocus,
+      onBlur,
       ...rest
     },
     ref
   ) => {
+    const [internalValue, setInternalValue] = useState<string>(
+      (externalValue as string) || ""
+    );
     const [isFocused, setIsFocused] = useState<boolean>(false);
-    const [value, setValue] = useState<string>((rest.value as string) || "");
+
+    useEffect(() => {
+      if (externalValue !== undefined) {
+        setInternalValue(externalValue as string);
+      }
+    }, [externalValue]);
+
+    const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+      const target = e.target as HTMLTextAreaElement;
+
+      target.style.height = "auto";
+
+      const lineHeight = 24;
+      const maxHeight = maxRows * lineHeight;
+      const newHeight = Math.min(target.scrollHeight, maxHeight);
+
+      target.style.height = `${newHeight}px`;
+    };
 
     const handleChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(e.target.value);
-        rest.onChange?.(e);
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = e.target.value;
+        setInternalValue(newValue);
+
+        if (onChange) {
+          onChange(e);
+        }
       },
-      [rest.onChange]
+      [onChange]
     );
 
     const handleFocus = useCallback(
-      (e: React.FocusEvent<HTMLInputElement>) => {
+      (e: React.FocusEvent<HTMLTextAreaElement>) => {
         setIsFocused(true);
-        rest.onFocus?.(e);
+        if (onFocus) {
+          onFocus(e);
+        }
       },
-      [rest.onFocus]
+      [onFocus]
     );
 
     const handleBlur = useCallback(
-      (e: React.FocusEvent<HTMLInputElement>) => {
+      (e: React.FocusEvent<HTMLTextAreaElement>) => {
         setIsFocused(false);
-        rest.onBlur?.(e);
+        if (onBlur) {
+          onBlur(e);
+        }
       },
-      [rest.onBlur]
+      [onBlur]
     );
 
-    const inputState: InputWithUploadProgressState = useMemo(() => {
+    const inputState: TextAreaWithUploadProgressState = useMemo(() => {
       return disabled ? "disabled" : isFocused ? "focused" : "default";
     }, [disabled, isFocused]);
 
-    const feedbackLevel: FeedbackLevel = useMemo(() => {
-      const textLength = value.length;
+    const textLength = internalValue.length;
 
+    const feedbackLevel: FeedbackLevel = useMemo(() => {
       if (textLength === 0) return "none";
       if (textLength < lowThreshold) return "low";
       if (textLength < mediumThreshold) return "medium";
       return "high";
-    }, [value.length, lowThreshold, mediumThreshold]);
+    }, [textLength, lowThreshold, mediumThreshold]);
 
     const containerStyle = STATE_STYLES[inputState];
 
     const { message, color } = FEEDBACK_INFO[feedbackLevel];
 
-    const textLength = value.length;
+    const isButtonDisabled = disabled || textLength === 0;
+
+    useEffect(() => {
+      if (ref && "current" in ref && ref.current) {
+        const textarea = ref.current;
+        const lineHeight = 24;
+        const maxHeight = maxRows * lineHeight;
+        const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+        textarea.style.height = `${newHeight}px`;
+      }
+    }, [maxRows, ref, internalValue]);
 
     return (
       <div className={className}>
         <div
           className={`relative rounded-2xl border ${containerStyle} overflow-hidden`}
         >
-          <div className="flex items-center p-4">
-            {/* 텍스트 입력 필드 */}
-            <input
-              ref={ref}
-              type="text"
-              className="flex-1 bg-transparent outline-none text-gray-700"
-              placeholder={placeholder}
-              disabled={disabled}
-              value={value}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              {...rest}
-            />
+          <div className="flex p-4">
+            <div className="flex-1 relative">
+              <textarea
+                ref={ref}
+                className="w-full bg-transparent outline-none text-gray-700 resize-none min-h-[72px]"
+                placeholder={placeholder}
+                disabled={disabled}
+                value={internalValue}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                onInput={handleInput}
+                rows={rows}
+                {...rest}
+              />
+            </div>
 
             {/* 업로드 버튼 또는 커스텀 요소 */}
-            {customRightElement || (
-              <UploadButton
-                variant={uploadButtonVariant}
-                onClick={onUploadClick}
-                disabled={disabled}
-                aria-label="Upload"
-              />
-            )}
+            <div className="absolute bottom-3 right-4">
+              {customRightElement || (
+                <UploadButton
+                  variant={uploadButtonVariant}
+                  onClick={onUploadClick}
+                  disabled={isButtonDisabled}
+                  aria-label="Upload"
+                />
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* 진행률 표시줄 */}
-        {showProgressBar && textLength > 0 && (
-          <div className="mt-2">
-            <ProgressBar
-              value={textLength}
-              lowThreshold={lowThreshold}
-              mediumThreshold={mediumThreshold}
-              highThreshold={highThreshold}
-            />
-          </div>
-        )}
+          {/* 진행률 표시줄 */}
+          {showProgressBar && textLength > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 h-1">
+              <ProgressBar
+                value={textLength}
+                lowThreshold={lowThreshold}
+                mediumThreshold={mediumThreshold}
+                highThreshold={highThreshold}
+              />
+            </div>
+          )}
+        </div>
 
         {/* 피드백 메시지 */}
         {textLength > 0 && feedbackLevel !== "none" && (
@@ -172,6 +226,6 @@ const InputWithUploadProgress = forwardRef<
   }
 );
 
-InputWithUploadProgress.displayName = "InputWithUploadProgress";
+TextAreaWithUploadProgress.displayName = "TextAreaWithUploadProgress";
 
-export default InputWithUploadProgress;
+export default TextAreaWithUploadProgress;

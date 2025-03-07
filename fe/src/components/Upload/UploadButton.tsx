@@ -37,7 +37,7 @@ export default function UploadButton({
       {...rest}
     >
       <Image
-        src="/images/Upload_icon.svg"
+        src="/images/icons/Upload_icon.svg"
         alt="Upload"
         width={ICON_SIZE}
         height={ICON_SIZE}
