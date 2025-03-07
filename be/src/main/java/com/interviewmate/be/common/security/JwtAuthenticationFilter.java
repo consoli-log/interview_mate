@@ -46,9 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Map<String, Object> claims = jwtTokenProvider.getClaims(token);
-
-            // 소셜 로그인 제공자별로 사용자 ID 가져오기
-            String username = (String) (claims.get("sub") != null ? claims.get("sub") : claims.get("id"));
+            String username = (String) claims.getOrDefault("email", claims.get("id"));
 
             // JWT에서 사용자 정보를 기반으로 SecurityContext에 저장
             UserDetails userDetails = new User(username, "", Collections.emptyList());

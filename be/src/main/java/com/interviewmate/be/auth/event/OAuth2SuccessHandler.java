@@ -19,7 +19,7 @@ import java.util.Map;
 
 /**
  * packageName    : com.interviewmate.be.auth.event
- * fileName       : OAuth2AuthenticationSuccessHandler
+ * fileName       : OAuth2SuccessHandler
  * author         : eumsoli
  * date           : 2025-03-07
  * description    : OAuth2 로그인 성공 후 JWT를 발급하고 응답하는 핸들러
@@ -27,7 +27,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -46,7 +46,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         OAuth2UserPrincipal oAuth2User = (OAuth2UserPrincipal) authentication.getPrincipal();
         String provider = oAuth2User.getProvider();
 
-        log.info("OAuth2AuthenticationSuccessHandler: provider={}", provider);
+        log.info("OAuth2SuccessHandler: provider={}", provider);
 
         // 제공자별 사용자 정보 객체 생성
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.getAttributes());

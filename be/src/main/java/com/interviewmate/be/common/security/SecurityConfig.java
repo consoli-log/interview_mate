@@ -1,7 +1,10 @@
 package com.interviewmate.be.common.security;
 
+import com.interviewmate.be.auth.application.AuthService;
 import com.interviewmate.be.auth.application.CustomOAuth2UserService;
-import com.interviewmate.be.auth.event.OAuth2AuthenticationSuccessHandler;
+import com.interviewmate.be.auth.event.OAuth2FailureHandler;
+import com.interviewmate.be.auth.event.OAuth2SuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +26,9 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final AuthService authService;
 
     /**
      * methodName : securityFilterChain
@@ -52,14 +57,17 @@ public class SecurityConfig {
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)) // 커스텀 OAuth2 서비스 등록
-                        .successHandler(oAuth2AuthenticationSuccessHandler) // OAuth2 로그인 성공 시 JWT 발급 핸들러 적용
+                        .successHandler(oAuth2SuccessHandler) // OAuth2 로그인 성공 시 핸들러
+                        .failureHandler(oAuth2FailureHandler) // OAuth2 로그인 실패 시 핸들러
                 )
 
-                // 로그아웃 설정 - Stateless 방식이므로 서버에서는 별도 작업 없이 200 응답만 반환
+                // 로그아웃 설정
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(200);
+                            authService.logout(request, response);
+                            response.setStatus(HttpServletResponse.SC_FOUND); // 302 Found (리다이렉트)
+                            response.setHeader("Location", "/"); // 홈으로 리다이렉트
                         })
                 )
 
