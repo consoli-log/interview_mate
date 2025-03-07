@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { RecordingState } from "@/hooks/useRecording";
 import RecordingButton from "@/components/Record/RecordingButton";
 import { useAudioUrl } from "@/hooks/useAudioUrl";
@@ -8,32 +8,57 @@ import { useAudioUrl } from "@/hooks/useAudioUrl";
 interface QuestionCardProps {
   question: string;
   onAnswerRecorded?: (audioBlob: Blob) => void;
+  onSaveRecording?: (audioBlob: Blob, questionId: string) => Promise<void>;
+  questionId?: string;
   className?: string;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({
   question,
   onAnswerRecorded,
+  onSaveRecording,
+  questionId = "",
   className,
 }) => {
   const [recordingState, setRecordingState] = useState<RecordingState>("ready");
+  const [saving, setSaving] = useState(false);
   const {
     audioUrl,
     createAudioUrl,
     handleStateChange: handleAudioUrlStateChange,
   } = useAudioUrl();
 
+  const audioBlobRef = useRef<Blob | null>(null);
+
   const handleRecordingStop = (audioBlob: Blob) => {
     if (onAnswerRecorded) {
       onAnswerRecorded(audioBlob);
     }
 
+    audioBlobRef.current = audioBlob;
     createAudioUrl(audioBlob);
   };
 
   const handleStateChange = (newState: RecordingState) => {
     setRecordingState(newState);
     handleAudioUrlStateChange(newState);
+
+    if (newState === "ready") {
+      audioBlobRef.current = null;
+    }
+  };
+
+  const handleSaveRecording = async () => {
+    if (!audioBlobRef.current || !onSaveRecording) return;
+
+    try {
+      setSaving(true);
+      await onSaveRecording(audioBlobRef.current, questionId);
+    } catch (error) {
+      console.error("저장 실패:", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -55,7 +80,26 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
 
       {audioUrl && recordingState === "completed" && (
         <div className="mt-4">
-          <p className="text-sm text-gray-200 mb-2">녹음된 답변:</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm text-gray-200">녹음된 답변:</p>
+            <div className="flex gap-2">
+              {onSaveRecording && (
+                <button
+                  onClick={handleSaveRecording}
+                  disabled={saving}
+                  className="px-3 py-1 text-sm bg-green-100 text-white-100 rounded-md hover:bg-green-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? "저장 중..." : "저장"}
+                </button>
+              )}
+              <button
+                onClick={() => handleStateChange("ready")}
+                className="px-3 py-1 text-sm bg-gray-100 text-black-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
           <audio controls src={audioUrl} className="w-full" />
         </div>
       )}
