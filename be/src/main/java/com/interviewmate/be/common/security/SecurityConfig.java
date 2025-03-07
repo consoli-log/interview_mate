@@ -1,5 +1,6 @@
 package com.interviewmate.be.common.security;
 
+import com.interviewmate.be.auth.application.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     /**
      * methodName : securityFilterChain
@@ -48,6 +50,7 @@ public class SecurityConfig {
 
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)) // 커스텀 OAuth2 서비스 등록
                         .defaultSuccessUrl("/api/auth/success") // 로그인 성공 시 이동할 URL
                         .failureUrl("/api/auth/failure") // 로그인 실패 시 이동할 URL
                 )
@@ -56,7 +59,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setStatus(200);
                         })
                 )
 
