@@ -1,5 +1,7 @@
 package com.interviewmate.be.auth.application;
 
+import com.interviewmate.be.auth.domain.OAuth2UserInfo;
+import com.interviewmate.be.auth.domain.OAuth2UserInfoFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -8,8 +10,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * packageName    : com.interviewmate.be.auth.application
@@ -36,33 +36,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String provider = userRequest.getClientRegistration().getRegistrationId();
 
-        // OAuth2 제공자별로 사용자 정보 매핑 (구글, 카카오 등)
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        String userId = extractUserId(provider, attributes);
+        // 제공자별 사용자 정보 객체 생성
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.getAttributes());
 
-        log.info("OAuth2 로그인: provider={}, userId={}", provider, userId);
+        log.info("OAuth2 로그인: provider={}, userId={}, email={}", provider, userInfo.getId(), userInfo.getEmail());
 
-        // 사용자 ID 키를 동적으로 설정 (구글: "sub", 카카오: "id")
-        String userIdKey = "google".equals(provider) ? "sub" : "id";
-
-        return new DefaultOAuth2User(oAuth2User.getAuthorities(), attributes, userIdKey);
-    }
-
-    /**
-     * methodName : extractUserId
-     * description : OAuth2 제공자별로 사용자 ID를 추출하는 메서드
-     *
-     * @param provider OAuth2 제공자 (google, kakao 등)
-     * @param attributes 사용자 정보 Map
-     * @return 사용자 ID (구글: sub, 카카오: id)
-     */
-    private String extractUserId(String provider, Map<String, Object> attributes) {
-        if ("google".equals(provider)) {
-            return (String) attributes.get("sub");
-        } else if ("kakao".equals(provider)) {
-            return String.valueOf(attributes.get("id"));
-        }
-        throw new OAuth2AuthenticationException("지원하지 않는 OAuth2 제공자: " + provider);
+        return new DefaultOAuth2User(oAuth2User.getAuthorities(), oAuth2User.getAttributes(), "id");
     }
 
 }
