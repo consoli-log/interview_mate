@@ -53,8 +53,6 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService)) // 커스텀 OAuth2 서비스 등록
                         .successHandler(oAuth2AuthenticationSuccessHandler) // OAuth2 로그인 성공 시 JWT 발급 핸들러 적용
-                        .defaultSuccessUrl("/api/auth/success") // 로그인 성공 시 이동할 URL
-                        .failureUrl("/api/auth/failure") // 로그인 실패 시 이동할 URL
                 )
 
                 // 로그아웃 설정 - Stateless 방식이므로 서버에서는 별도 작업 없이 200 응답만 반환
@@ -70,4 +68,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }

@@ -2,6 +2,7 @@ package com.interviewmate.be.auth.event;
 
 import com.interviewmate.be.auth.domain.OAuth2UserInfo;
 import com.interviewmate.be.auth.domain.OAuth2UserInfoFactory;
+import com.interviewmate.be.auth.domain.OAuth2UserPrincipal;
 import com.interviewmate.be.common.security.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -43,8 +43,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
      */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String provider = request.getParameter("provider"); // OAuth2 제공자 정보
+        OAuth2UserPrincipal oAuth2User = (OAuth2UserPrincipal) authentication.getPrincipal();
+        String provider = oAuth2User.getProvider();
+
+        log.info("OAuth2AuthenticationSuccessHandler: provider={}", provider);
 
         // 제공자별 사용자 정보 객체 생성
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.getAttributes());
@@ -60,10 +62,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         String accessToken = jwtTokenProvider.generateAccessToken(claims);
         String refreshToken = jwtTokenProvider.generateRefreshToken(claims);
 
-        // 클라이언트에 JWT 반환 (헤더 설정)
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.setHeader("Refresh-Token", refreshToken);
-        response.setStatus(HttpServletResponse.SC_OK);
+        // Secure HttpOnly Cookie에 JWT 저장 (클라이언트에서 접근 불가능)
+        response.addHeader("Set-Cookie", "access_token=" + accessToken + "; Path=/; HttpOnly; Secure; SameSite=Lax");
+        response.addHeader("Set-Cookie", "refresh_token=" + refreshToken + "; Path=/; HttpOnly; Secure; SameSite=Lax");
+
+        // TODO 프론트엔드 페이지로 변경하기
+        response.sendRedirect("http://localhost:3000/oauth2/success");
     }
 
 }

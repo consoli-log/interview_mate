@@ -1,5 +1,7 @@
 package com.interviewmate.be.auth.domain;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Map;
 
 /**
@@ -9,6 +11,7 @@ import java.util.Map;
  * date           : 2025-03-07
  * description    : OAuth2 제공자별 사용자 정보를 처리하는 팩토리 클래스
  */
+@Slf4j
 public class OAuth2UserInfoFactory {
 
     /**
@@ -20,11 +23,15 @@ public class OAuth2UserInfoFactory {
      * @return OAuth2UserInfo 제공자별 사용자 정보 객체
      */
     public static OAuth2UserInfo getOAuth2UserInfo(String provider, Map<String, Object> attributes) {
+        log.info("OAuth2UserInfoFactory: provider={}, attributes={}", provider, attributes);
+
         if ("google".equals(provider)) {
             return new GoogleOAuth2UserInfo(attributes);
         } else if ("kakao".equals(provider)) {
             return new KakaoOAuth2UserInfo(attributes);
         }
+
         throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자: " + provider);
     }
+
 }
