@@ -1,5 +1,10 @@
 import React from "react";
+import ExampleUsage from "./RecordingTest";
 
 export default function Main() {
-  return <div>123</div>;
+  return (
+    <div>
+      <ExampleUsage />
+    </div>
+  );
 }
