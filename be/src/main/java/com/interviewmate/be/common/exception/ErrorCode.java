@@ -3,7 +3,9 @@ package com.interviewmate.be.common.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /**
@@ -22,7 +24,10 @@ public enum ErrorCode {
     TOKEN_EXPIRED(UNAUTHORIZED, "만료된 JWT 토큰입니다."),
     UNSUPPORTED_TOKEN(UNAUTHORIZED, "지원되지 않는 JWT 토큰입니다."),
     INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
-    UNAUTHORIZED_ACCESS(UNAUTHORIZED, "인증되지 않은 접근입니다. 로그인 후 이용해 주세요.");
+    UNAUTHORIZED_ACCESS(UNAUTHORIZED, "인증되지 않은 접근입니다. 로그인 후 이용해 주세요."),
+
+    // 사용자 관련 예외
+    EMAIL_ALREADY_EXISTS(CONFLICT, "이미 존재하는 이메일입니다.");
 
     private final HttpStatus httpStatus; // HTTP 상태 코드
     private final String message; // 에러 메시지

@@ -1,5 +1,7 @@
 package com.interviewmate.be.auth.event;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.interviewmate.be.auth.application.AuthService;
 import com.interviewmate.be.auth.domain.OAuth2UserInfo;
 import com.interviewmate.be.auth.domain.OAuth2UserInfoFactory;
 import com.interviewmate.be.auth.domain.OAuth2UserPrincipal;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -22,7 +25,7 @@ import java.util.Map;
  * fileName       : OAuth2SuccessHandler
  * author         : eumsoli
  * date           : 2025-03-07
- * description    : OAuth2 로그인 성공 후 JWT를 발급하고 응답하는 핸들러
+ * description    : OAuth2 로그인 성공 후 회원 여부를 체크하고 JWT를 발급하는 핸들러
  */
 @Slf4j
 @Component
@@ -30,10 +33,12 @@ import java.util.Map;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final ObjectMapper objectMapper;
+    private final AuthService authService;
 
     /**
      * methodName : onAuthenticationSuccess
-     * description : OAuth2 로그인 성공 시 JWT 발급 후 클라이언트에 응답
+     * description : OAuth2 로그인 성공 시 회원 여부를 체크하고 JWT 발급
      *
      * @param request HTTP 요청 객체
      * @param response HTTP 응답 객체
@@ -53,21 +58,31 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         log.info("OAuth2 로그인 성공: provider={}, userId={}, email={}", provider, userInfo.getId(), userInfo.getEmail());
 
-        // JWT 생성
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", userInfo.getId());
-        claims.put("email", userInfo.getEmail());
-        claims.put("provider", provider);
+        // 기존 회원 여부 확인
+        boolean isNewUser = authService.isNewUser(userInfo.getEmail());
 
-        String accessToken = jwtTokenProvider.generateAccessToken(claims);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(claims);
+        Map<String, Object> tokens = new HashMap<>();
+        tokens.put("isNewUser", isNewUser);
 
-        // Secure HttpOnly Cookie에 JWT 저장 (클라이언트에서 접근 불가능)
-        response.addHeader("Set-Cookie", "access_token=" + accessToken + "; Path=/; HttpOnly; Secure; SameSite=Lax");
-        response.addHeader("Set-Cookie", "refresh_token=" + refreshToken + "; Path=/; HttpOnly; Secure; SameSite=Lax");
+        if (!isNewUser) {
+            // 기존 회원이면 JWT 발급
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("id", userInfo.getId());
+            claims.put("email", userInfo.getEmail());
+            claims.put("provider", provider);
 
-        // TODO 프론트엔드 페이지로 변경하기
-        response.sendRedirect("http://localhost:3000/oauth2/success");
+            String accessToken = jwtTokenProvider.generateAccessToken(claims);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(claims);
+
+            tokens.put("accessToken", accessToken);
+            tokens.put("refreshToken", refreshToken);
+        }
+
+        // JSON 응답
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(tokens));
+        response.setStatus(HttpServletResponse.SC_OK);
+
     }
 
 }

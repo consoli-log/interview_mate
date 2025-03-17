@@ -1,6 +1,7 @@
 package com.interviewmate.be.auth.presentation;
 
 import com.interviewmate.be.auth.application.AuthService;
+import com.interviewmate.be.auth.dto.SignupRequest;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.common.response.ApiResponse;
@@ -11,17 +12,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * packageName    : com.interviewmate.be.auth.presentation
  * fileName       : AuthController
  * author         : eumsoli
  * date           : 2025-03-08
- * description    : OAuth2 로그인 관련 API 컨트롤러
+ * description    : OAuth2 로그인 및 회원가입 관련 API 컨트롤러
  */
 @Slf4j
 @RestController
@@ -30,6 +30,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+
+    /**
+     * methodName : signup
+     * description : 신규 회원가입 API
+     *
+     * @param request 회원가입 요청 데이터
+     * @return ApiResponse<Map<String, String>> JWT Access/Refresh Token 응답
+     */
+    @PostMapping("/signup")
+    public ResponseEntity<ApiResponse<Map<String, String>>> signup(@RequestBody SignupRequest request) {
+        log.info("회원가입 요청: email={}", request.getEmail());
+        Map<String, String> tokens = authService.signup(request);
+        return ResponseEntity.ok(ApiResponse.success(tokens));
+    }
+
 
     /**
      * methodName : getCurrentUser
