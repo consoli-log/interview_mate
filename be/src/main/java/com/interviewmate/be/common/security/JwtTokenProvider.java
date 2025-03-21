@@ -28,23 +28,23 @@ import java.util.Map;
 public class JwtTokenProvider {
 
     private final SecretKey secretKey;
-    private final long accessTokenValidity;
-    private final long refreshTokenValidity;
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
 
     /**
      * 생성자에서 키와 유효기간을 설정
      *
      * @param secret JWT 서명용 비밀키
-     * @param accessTokenValidity Access Token 유효시간
-     * @param refreshTokenValidity Refresh Token 유효시간
+     * @param accessTokenExpiration Access Token 유효시간
+     * @param refreshTokenExpiration Refresh Token 유효시간
      */
     public JwtTokenProvider(@Value("${jwt.secret}") String secret,
-                            @Value("${jwt.access-token-validity}") long accessTokenValidity,
-                            @Value("${jwt.refresh-token-validity}") long refreshTokenValidity) {
+                            @Value("${jwt.access-token-expiration}") long accessTokenExpiration,
+                            @Value("${jwt.refresh-token-expiration}") long refreshTokenExpiration) {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenValidity = accessTokenValidity;
-        this.refreshTokenValidity = refreshTokenValidity;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
     /**
@@ -55,7 +55,7 @@ public class JwtTokenProvider {
      * @return 생성된 Access Token 문자열
      */
     public String generateAccessToken(Map<String, Object> claims) {
-        return generateToken(claims, accessTokenValidity);
+        return generateToken(claims, accessTokenExpiration);
     }
 
     /**
@@ -66,7 +66,7 @@ public class JwtTokenProvider {
      * @return 생성된 Refresh Token 문자열
      */
     public String generateRefreshToken(Map<String, Object> claims) {
-        return generateToken(claims, refreshTokenValidity);
+        return generateToken(claims, refreshTokenExpiration);
     }
 
     /**

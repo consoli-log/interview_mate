@@ -1,5 +1,9 @@
 package com.interviewmate.be.common.security;
 
+import com.interviewmate.be.common.exception.CustomException;
+import com.interviewmate.be.common.exception.ErrorCode;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -42,20 +47,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
         String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Map<String, Object> claims = jwtTokenProvider.getClaims(token);
-            String username = (String) claims.getOrDefault("email", claims.get("id"));
+        if (token != null) {
+            try {
+                if (jwtTokenProvider.validateToken(token)) {
+                    // JWT에서 Claims 추출
+                    Map<String, Object> claims = jwtTokenProvider.getClaims(token);
+                    String providerId = (String) claims.get("providerId");
 
-            // JWT에서 사용자 정보를 기반으로 SecurityContext에 저장
-            UserDetails userDetails = new User(username, "", Collections.emptyList());
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                    // UserDetails 생성
+                    UserDetails userDetails = new User(providerId, "", Collections.emptyList());
+
+                    // Spring Security Context에 사용자 정보 저장
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }  catch (ExpiredJwtException e) {
+                throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+            } catch (JwtException e) {
+                throw new CustomException(ErrorCode.INVALID_TOKEN);
+            }
         }
 
-        chain.doFilter(request, response);
+            chain.doFilter(request, response);
     }
 
     /**
