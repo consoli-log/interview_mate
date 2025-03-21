@@ -1,19 +1,13 @@
 package com.interviewmate.be.auth.application;
 
-import com.interviewmate.be.auth.domain.User;
-import com.interviewmate.be.auth.dto.SignupRequest;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.common.security.JwtTokenProvider;
-import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,76 +22,46 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenService tokenService;
 
     /**
-     * methodName : isNewUser
-     * description : 이메일을 기반으로 기존 회원 여부 확인
+     * methodName : refreshAccessToken
+     * description : Refresh Token을 검증하고 새로운 Access Token을 발급
      *
-     * @param email 사용자 이메일
-     * @return boolean 신규 사용자 여부 (true: 신규, false: 기존 회원)
-     */
-    public boolean isNewUser(String email) {
-        return !userRepository.existsByEmail(email);
-    }
-
-    /**
-     * methodName : signup
-     * description : 신규 사용자 회원가입 처리
-     *
-     * @param request 회원가입 요청 데이터
-     * @return Map<String, String> JWT Access/Refresh Token 응답
+     * @param refreshToken 클라이언트가 보낸 Refresh Token
+     * @return 새로운 Access Token
      */
     @Transactional
-    public Map<String, String> signup(SignupRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+    public String refreshAccessToken(String refreshToken) {
+        // Refresh Token 검증
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
-        // 사용자 정보 저장
-        User newUser = User.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .provider(request.getProvider())
-                .build();
-        userRepository.save(newUser);
+        // Refresh Token에서 Claims 추출
+        Map<String, Object> claims = jwtTokenProvider.getClaims(refreshToken);
+        String providerId = (String) claims.get("providerId");
 
-        // JWT 발급
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("email", request.getEmail());
-        claims.put("provider", request.getProvider());
+        // Redis에서 저장된 Refresh Token 확인
+        String storedRefreshToken = tokenService.getRefreshToken(providerId);
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.TOKEN_NOT_FOUND);
+        }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(claims);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(claims);
-
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", accessToken);
-        tokens.put("refreshToken", refreshToken);
-        return tokens;
+        // 새로운 Access Token 발급
+        return jwtTokenProvider.generateAccessToken(claims);
     }
 
     /**
      * methodName : logout
-     * description : 로그아웃 처리 메서드
+     * description : 로그아웃 시 Refresh Token 삭제
      *
-     * @param request  HTTP 요청 객체
-     * @param response HTTP 응답 객체
+     * @param providerId 로그아웃할 사용자의 providerId
      */
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        log.info("로그아웃 : 쿠키 삭제");
-        deleteCookie(response, "access_token");
-        deleteCookie(response, "refresh_token");
+    @Transactional
+    public void logout(String providerId) {
+        tokenService.deleteRefreshToken(providerId);
     }
 
-    /**
-     * methodName : deleteCookie
-     * description : 특정 쿠키를 삭제하는 메서드
-     *
-     * @param response HTTP 응답 객체
-     * @param cookieName 삭제할 쿠키 이름
-     */
-    private void deleteCookie(HttpServletResponse response, String cookieName) {
-        response.addHeader("Set-Cookie", cookieName + "=; Path=/; HttpOnly; Secure; Max-Age=0; SameSite=Lax");
-    }
 }

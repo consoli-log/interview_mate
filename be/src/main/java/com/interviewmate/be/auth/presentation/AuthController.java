@@ -1,18 +1,17 @@
 package com.interviewmate.be.auth.presentation;
 
 import com.interviewmate.be.auth.application.AuthService;
-import com.interviewmate.be.auth.dto.SignupRequest;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.common.response.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
@@ -21,7 +20,7 @@ import java.util.Map;
  * fileName       : AuthController
  * author         : eumsoli
  * date           : 2025-03-08
- * description    : OAuth2 로그인 및 회원가입 관련 API 컨트롤러
+ * description    : JWT 기반 인증 관련 API를 제공하는 컨트롤러
  */
 @Slf4j
 @RestController
@@ -32,49 +31,41 @@ public class AuthController {
     private final AuthService authService;
 
     /**
-     * methodName : signup
-     * description : 신규 회원가입 API
+     * methodName : refreshToken
+     * description :  - Refresh Token을 이용하여 새로운 Access Token 발급 API
      *
-     * @param request 회원가입 요청 데이터
-     * @return ApiResponse<Map<String, String>> JWT Access/Refresh Token 응답
+     * @param requestBody 요청 본문(JSON) { "refreshToken": "..." }
+     * @return 새로운 Access Token
      */
-    @PostMapping("/signup")
-    public ResponseEntity<ApiResponse<Map<String, String>>> signup(@RequestBody SignupRequest request) {
-        log.info("회원가입 요청: email={}", request.getEmail());
-        Map<String, String> tokens = authService.signup(request);
-        return ResponseEntity.ok(ApiResponse.success(tokens));
-    }
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> requestBody) {
+        String refreshToken = requestBody.get("refreshToken");
 
-
-    /**
-     * methodName : getCurrentUser
-     * description : 현재 로그인한 사용자 정보 조회 API
-     *
-     * @param userDetails 현재 인증된 사용자 정보
-     * @return ApiResponse<UserDetails> 사용자 정보 반환
-     */
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserDetails>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null || userDetails.getUsername() == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
-        return ResponseEntity.ok(ApiResponse.success(userDetails));
+
+        String newAccessToken = authService.refreshAccessToken(refreshToken);
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
     /**
      * methodName : logout
-     * description : 로그아웃 처리 API (쿠키 삭제)
+     * description : 로그아웃 API - Redis에서 Refresh Token 삭제
      *
-     * @param request  HTTP 요청 객체
-     * @param response HTTP 응답 객체
-     * @return ApiResponse<Void> 로그아웃 성공 응답
+     * @param user 인증된 사용자 정보 (providerId 기반)
+     * @return 204 No Content (성공)
      */
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request, HttpServletResponse response) {
-        authService.logout(request, response);
-        response.setHeader("Location", "/");
-        response.setStatus(302);
-        return ResponseEntity.ok(ApiResponse.success());
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("로그아웃 요청: 인증된 사용자 없음");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        log.info("로그아웃 요청: providerId={}", user.getUsername());
+        authService.logout(user.getUsername());  // providerId 기반으로 Refresh Token 삭제
+        return ResponseEntity.noContent().build(); // 204 No Content 응답
     }
 
 }
