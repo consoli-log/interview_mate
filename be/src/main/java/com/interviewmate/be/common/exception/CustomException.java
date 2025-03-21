@@ -1,6 +1,7 @@
 package com.interviewmate.be.common.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 /**
  * packageName    : com.interviewmate.be.common.exception
@@ -12,16 +13,13 @@ import lombok.Getter;
 @Getter
 public class CustomException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final HttpStatus httpStatus;
+    private final String message;
 
     public CustomException(ErrorCode errorCode) {
-        super(errorCode.getMessage()); // 기본 메세지
-        this.errorCode = errorCode;
-    }
-
-    public CustomException(ErrorCode errorCode, String message) {
-        super(message);  // 커스텀 메세지
-        this.errorCode = errorCode;
+        super(errorCode.getMessage());
+        this.httpStatus = errorCode.getHttpStatus();
+        this.message = errorCode.getMessage();
     }
 
 }
