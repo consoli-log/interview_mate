@@ -17,15 +17,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     /**
-     * methodName : existsByEmail
-     * description : 이메일을 기반으로 사용자의 존재 여부 확인
-     *
-     * @param email 사용자 이메일
-     * @return boolean 사용자 존재 여부 (true: 존재, false: 없음)
-     */
-    boolean existsByEmail(String email);
-
-    /**
      * methodName : findByEmail
      * description : 이메일을 기반으로 사용자 정보 조회
      *
@@ -33,5 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @return Optional<User> 조회된 사용자 정보
      */
     Optional<User> findByEmail(String email);
+
 }
 

@@ -17,28 +17,10 @@ public abstract class OAuth2UserInfo {
         this.attributes = attributes;
     }
 
-    /**
-     * methodName : getId
-     * description : OAuth2 제공자별 사용자 고유 ID 반환
-     *
-     * @return 사용자 ID
-     */
-    public abstract String getId();
+    public abstract String getId(); // 사용자 ID (providerId)
 
-    /**
-     * methodName : getEmail
-     * description : OAuth2 제공자별 사용자 이메일 반환
-     *
-     * @return 사용자 이메일
-     */
-    public abstract String getEmail();
+    public abstract String getEmail(); // 사용자 이메일
 
-    /**
-     * methodName : getName
-     * description : OAuth2 제공자별 사용자 이름 반환
-     *
-     * @return 사용자 이름
-     */
-    public abstract String getName();
+    public abstract String getName(); // 사용자 이름
 
 }
