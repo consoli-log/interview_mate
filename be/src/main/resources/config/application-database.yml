@@ -11,3 +11,7 @@ spring:
     properties:
       hibernate:
         format_sql: true # SQL 쿼리를 보기 좋게 포맷팅
+  data:
+    redis:
+      host: localhost
+      port: ${REDIS_PORT}
