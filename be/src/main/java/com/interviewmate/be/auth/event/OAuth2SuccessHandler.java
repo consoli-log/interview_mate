@@ -32,7 +32,7 @@ import java.util.Map;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final TokenService TokenService;
+    private final TokenService tokenService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -68,7 +68,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtTokenProvider.generateRefreshToken(claims);
 
         // Refresh Token을 Redis에 저장
-        TokenService.saveRefreshToken(userInfo.getId(), refreshToken);
+        tokenService.saveRefreshToken(userInfo.getId(), refreshToken);
 
         Map<String, String> tokenResponse = new HashMap<>();
         tokenResponse.put("accessToken", accessToken);

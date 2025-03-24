@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +40,9 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
     public void onAuthenticationFailure(HttpServletRequest request,
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
-        log.warn("OAuth2 로그인 실패: {}", exception.getMessage());
+        log.error("OAuth2 로그인 실패: {}", exception.getMessage());
 
-        ErrorCode errorCode = resolveOAuth2ErrorCode(exception.getMessage());
+        ErrorCode errorCode = resolveOAuth2ErrorCode(exception);
 
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType("application/json;charset=UTF-8");
@@ -55,25 +56,25 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
 
     /**
      * methodName : resolveOAuth2ErrorCode
-     * description : OAuth2 예외 메시지에 따라 ErrorCode 반환
+     * description : OAuth2 로그인 실패 시 발생한 예외 객체를 분석하여 대응하는 ErrorCode를 반환하는 메서드
      *
-     * @param message 예외 메시지
-     * @return ErrorCode 매핑된 에러 코드
+     * @param exception OAuth2 인증 실패 시 발생한 AuthenticationException 객체
+     * @return ErrorCode 매핑된 에러 코드 (OAuth2 관련 코드 또는 알 수 없는 오류 코드)
      */
-    private ErrorCode resolveOAuth2ErrorCode(String message) {
-        String msg = message.toLowerCase();
+    private ErrorCode resolveOAuth2ErrorCode(AuthenticationException exception) {
+        if (exception instanceof OAuth2AuthenticationException authEx) {
+            String errorCode = authEx.getError().getErrorCode();
 
-        if (msg.contains("access_denied")) {
-            return ErrorCode.OAUTH2_ACCESS_DENIED;
-        } else if (msg.contains("redirect_uri_mismatch")) {
-            return ErrorCode.OAUTH2_REDIRECT_URI_MISMATCH;
-        } else if (msg.contains("invalid_scope")) {
-            return ErrorCode.OAUTH2_INVALID_SCOPE;
-        } else if (msg.contains("client_id")) {
-            return ErrorCode.OAUTH2_CLIENT_ERROR;
-        } else {
-            return ErrorCode.OAUTH2_UNKNOWN_ERROR;
+            return switch (errorCode) {
+                case "access_denied" -> ErrorCode.OAUTH2_ACCESS_DENIED;
+                case "redirect_uri_mismatch" -> ErrorCode.OAUTH2_REDIRECT_URI_MISMATCH;
+                case "invalid_scope" -> ErrorCode.OAUTH2_INVALID_SCOPE;
+                case "client_id" -> ErrorCode.OAUTH2_CLIENT_ERROR;
+                default -> ErrorCode.UNKNOWN_ERROR;
+            };
         }
+
+        return ErrorCode.UNKNOWN_ERROR;
     }
 
     /**

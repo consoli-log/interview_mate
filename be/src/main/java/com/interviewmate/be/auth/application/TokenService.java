@@ -20,7 +20,9 @@ import java.util.concurrent.TimeUnit;
 public class TokenService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1209600000L; // 14일 (밀리초)
+
+    private static final String REFRESH_TOKEN_PREFIX = "refresh:";
+    private static final long REFRESH_TOKEN_EXPIRE_TIME_MS = 14 * 24 * 60 * 60 * 1000L;  // 14일 (밀리초)
 
     /**
      * methodName : saveRefreshToken
@@ -30,8 +32,8 @@ public class TokenService {
      * @param refreshToken  발급된 Refresh Token
      */
     public void saveRefreshToken(String providerId, String refreshToken) {
-        redisTemplate.opsForValue().set("refresh:" + providerId, refreshToken, REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.MILLISECONDS);
-        log.info("Refresh Token 저장 완료: providerId={}, 만료시간={}", providerId, REFRESH_TOKEN_EXPIRE_TIME);
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + providerId, refreshToken, REFRESH_TOKEN_EXPIRE_TIME_MS, TimeUnit.MILLISECONDS);
+        log.info("Refresh Token 저장 완료: providerId={}, 만료시간={}", providerId, REFRESH_TOKEN_EXPIRE_TIME_MS);
         log.info("Redis 저장: refresh:{} = {}", providerId, refreshToken);
     }
 
@@ -43,7 +45,7 @@ public class TokenService {
      * @return String Refresh Token
      */
     public String getRefreshToken(String providerId ) {
-        String token = redisTemplate.opsForValue().get("refresh:" + providerId);
+        String token = redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + providerId);
         log.info("Redis 조회: refresh:{} = {}", providerId, token);
         return token;
     }
@@ -55,7 +57,7 @@ public class TokenService {
      * @param providerId  사용자 ID
      */
     public void deleteRefreshToken(String providerId ) {
-        redisTemplate.delete("refresh:" + providerId );
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + providerId );
         log.info("Refresh Token 삭제 완료: userId={}", providerId );
     }
 

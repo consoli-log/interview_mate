@@ -1,4 +1,4 @@
-package com.interviewmate.be.common.response;
+package com.interviewmate.be.common.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

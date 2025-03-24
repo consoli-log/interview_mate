@@ -1,9 +1,10 @@
 package com.interviewmate.be.common.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
+import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,6 +32,8 @@ import java.util.Map;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 응답용
 
     /**
      * methodName : doFilterInternal
@@ -40,41 +41,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      *
      * @param request HTTP 요청 객체
      * @param response HTTP 응답 객체
-     * @param chain 필터 체인
+     * @param filterChain 필터 체인
      * @throws ServletException 필터 처리 중 발생할 수 있는 예외
      * @throws IOException 입출력 예외
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String token = resolveToken(request);
 
-        if (token != null) {
-            try {
-                if (jwtTokenProvider.validateToken(token)) {
-                    // JWT에서 Claims 추출
-                    Map<String, Object> claims = jwtTokenProvider.getClaims(token);
-                    String providerId = (String) claims.get("providerId");
+        try {
+            if (token != null && jwtTokenProvider.validateToken(token)) {
+                Map<String, Object> claims = jwtTokenProvider.getClaims(token);
+                String providerId = (String) claims.get("providerId");
 
-                    // UserDetails 생성
-                    UserDetails userDetails = new User(providerId, "", Collections.emptyList());
+                // User 엔티티 조회
+                User user = userRepository.findByProviderId(providerId)
+                        .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-                    // Spring Security Context에 사용자 정보 저장
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }  catch (ExpiredJwtException e) {
-                throw new CustomException(ErrorCode.TOKEN_EXPIRED);
-            } catch (JwtException e) {
-                throw new CustomException(ErrorCode.INVALID_TOKEN);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }
 
-            chain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } catch (CustomException ex) {
+            handleJwtException(response, ex);
+        }
     }
 
     /**
@@ -90,6 +88,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    /**
+     * methodName : handleJwtException
+     * description : JWT 검증 실패 시 JSON 형식으로 예외 응답 전송
+     *
+     * @param response HTTP 응답 객체
+     * @param ex CustomException 객체
+     * @throws IOException JSON 응답 작성 중 예외 발생 시
+     */
+    private void handleJwtException(HttpServletResponse response, CustomException ex) throws IOException {
+        log.warn("JWT 인증 실패: {}", ex.getMessage());
+
+        response.setStatus(ex.getHttpStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> errorBody = Map.of(
+                "status", ex.getHttpStatus().value(),
+                "message", ex.getMessage(),
+                "error", ex.getHttpStatus().getReasonPhrase()
+        );
+
+        response.getWriter().write(objectMapper.writeValueAsString(errorBody));
     }
 
 }

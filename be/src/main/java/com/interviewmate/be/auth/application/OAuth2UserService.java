@@ -4,6 +4,7 @@ import com.interviewmate.be.auth.domain.OAuth2UserInfo;
 import com.interviewmate.be.auth.domain.OAuth2UserInfoFactory;
 import com.interviewmate.be.auth.domain.OAuth2UserPrincipal;
 import com.interviewmate.be.auth.domain.User;
+import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 /**
  * packageName    : com.interviewmate.be.auth.application
@@ -42,37 +45,48 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
-
-        // OAuth2 제공자 ID 가져오기 (google, kakao 등)
-        String provider = oAuth2UserRequest.getClientRegistration().getRegistrationId();
+        String provider = oAuth2UserRequest.getClientRegistration().getRegistrationId().toLowerCase();
 
         log.info("OAuth2UserService: provider={}", provider);
 
-        // OAuth2 제공자별로 사용자 정보 가져오기
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.getAttributes());
 
-        // 이메일 또는 providerId를 기준으로 기존 유저 검색
-        Optional<User> userOptional = userRepository.findByEmail(userInfo.getEmail());
-        User user;
+        String providerId = userInfo.getId();
+        String email = userInfo.getEmail();
+        String name = userInfo.getName();
 
-        if (userOptional.isPresent()) {
-            // 기존 회원이면 그대로 반환
-            user = userOptional.get();
-        } else {
-            // 신규 회원 가입
-            user = User.builder()
-                    .email(userInfo.getEmail())
-                    .name(userInfo.getName())
-                    .providerId(userInfo.getId())
-                    .provider(provider)
-                    .build();
-            userRepository.save(user);
+        // 1️⃣ 이메일로 사용자 존재 여부 확인
+        Optional<User> sameEmailUser = userRepository.findByEmail(email);
+
+        if (sameEmailUser.isPresent()) {
+            User existingUser = sameEmailUser.get();
+
+            // 2️⃣ 이메일은 같지만 소셜 제공자가 다른 경우 예외 처리
+            if (!existingUser.getProvider().equalsIgnoreCase(provider)) {
+                log.warn("소셜 제공자 불일치: 기존={}, 요청={}", existingUser.getProvider(), provider);
+
+                throw new CustomException(
+                        CONFLICT,
+                        String.format("해당 이메일은 '%s' 계정으로 이미 가입되어 있습니다. 기존 계정으로 로그인해 주세요.", existingUser.getProvider())
+                );
+            }
+
+            return new OAuth2UserPrincipal(provider, oAuth2User); // 기존 사용자
         }
 
-        log.info("OAuth2 로그인: provider={}, userId={}, email={}", provider, userInfo.getId(), userInfo.getEmail());
+        // 3️⃣ 신규 사용자 가입
+        User newUser = User.builder()
+                .email(email)
+                .name(name)
+                .providerId(providerId)
+                .provider(provider)
+                .build();
+
+        userRepository.save(newUser);
+
+        log.info("신규 회원 가입: provider={}, providerId={}, email={}", provider, providerId, email);
 
         return new OAuth2UserPrincipal(provider, oAuth2User);
-
     }
 
 }

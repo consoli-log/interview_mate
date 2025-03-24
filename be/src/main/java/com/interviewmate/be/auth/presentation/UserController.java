@@ -3,10 +3,13 @@ package com.interviewmate.be.auth.presentation;
 import com.interviewmate.be.auth.application.TokenService;
 import com.interviewmate.be.auth.application.UserService;
 import com.interviewmate.be.auth.domain.User;
+import com.interviewmate.be.common.exception.CustomException;
+import com.interviewmate.be.common.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +26,7 @@ import java.util.Map;
  * date           : 2025-03-21
  * description    : 사용자 관련 API를 제공하는 컨트롤러
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -48,13 +52,20 @@ public class UserController {
                     @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않음")
             }
     )
-    public Map<String, Object> getCurrentUser(@AuthenticationPrincipal User user) {
-        return Map.of(
+    public ResponseEntity<Map<String, Object>> getCurrentUser(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("인증되지 않은 사용자 정보 요청");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        log.info("현재 사용자 정보 조회: providerId={}", user.getProviderId());
+
+        return ResponseEntity.ok(Map.of(
                 "email", user.getEmail(),
                 "name", user.getName(),
                 "providerId", user.getProviderId(),
                 "provider", user.getProvider()
-        );
+        ));
     }
 
     /**
@@ -62,6 +73,7 @@ public class UserController {
      * description : 회원 탈퇴 API - 현재 로그인된 사용자를 DB에서 삭제하고, Refresh Token도 Redis에서 제거
      *
      * @param user 현재 로그인된 사용자
+     * @return 204 No Content
      */
     @DeleteMapping
     @SecurityRequirement(name = "bearerAuth")
@@ -77,6 +89,12 @@ public class UserController {
             }
     )
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            log.warn("회원 탈퇴 요청: 인증되지 않은 사용자");
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        log.info("회원 탈퇴 요청: providerId={}", user.getProviderId());
 
         userService.deleteUser(user); // DB에서 삭제
         tokenService.deleteRefreshToken(user.getProviderId()); // Redis에서 삭제

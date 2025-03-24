@@ -3,6 +3,7 @@ package com.interviewmate.be.common.security;
 import com.interviewmate.be.auth.application.OAuth2UserService;
 import com.interviewmate.be.auth.event.OAuth2FailureHandler;
 import com.interviewmate.be.auth.event.OAuth2SuccessHandler;
+import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuth2UserService oAuth2UserService;
+    private final UserRepository userRepository;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
 
@@ -36,11 +38,13 @@ public class SecurityConfig {
      * @throws Exception 설정 중 발생할 수 있는 예외
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) throws Exception {
 
         http
                 // CSRF 비활성화 (JWT 기반이므로 필요 없음)
                 .csrf(csrf -> csrf.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(formLogin -> formLogin.disable())
 
                 // 세션을 사용하지 않도록 설정 (Stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -58,10 +62,27 @@ public class SecurityConfig {
                         .failureHandler(oAuth2FailureHandler) // OAuth2 로그인 실패 시 핸들러
                 )
 
+                // 인증 실패 처리
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
+                )
+
                 // JWT 필터 추가
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);  // JWT 필터 추가
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);  // JWT 필터 추가
 
         return http.build();
+    }
+
+    /**
+     * methodName : jwtAuthenticationFilter
+     * description : JWT 인증 필터 빈 등록
+     *
+     * @return JwtAuthenticationFilter JWT 인증 필터
+     */
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider, userRepository);
     }
 
 }

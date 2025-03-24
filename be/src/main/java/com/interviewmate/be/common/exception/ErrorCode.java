@@ -37,14 +37,19 @@ public enum ErrorCode {
     TOKEN_NOT_FOUND(UNAUTHORIZED, "Refresh Token을 찾을 수 없습니다."),
 
     // 인증 실패 관련 예외
+    OAUTH2_PROVIDER_MISMATCH(CONFLICT, "해당 이메일은 다른 소셜 계정으로 이미 가입되어 있습니다."),
     OAUTH2_ACCESS_DENIED(UNAUTHORIZED, "사용자가 로그인 인증을 취소했습니다."),
     OAUTH2_REDIRECT_URI_MISMATCH(BAD_REQUEST, "리디렉션 URI가 잘못되었습니다."),
     OAUTH2_INVALID_SCOPE(BAD_REQUEST, "요청한 권한이 거부되었습니다."),
     OAUTH2_CLIENT_ERROR(BAD_REQUEST, "OAuth2 클라이언트 설정이 잘못되었습니다."),
-    OAUTH2_UNKNOWN_ERROR(INTERNAL_SERVER_ERROR, "알 수 없는 로그인 오류가 발생했습니다."),
+
+    // 공통 관련 예외
+    UNKNOWN_ERROR(INTERNAL_SERVER_ERROR, "알 수 없는 로그인 오류가 발생했습니다."),
+    FORBIDDEN_ACCESS(FORBIDDEN, "접근이 거부되었습니다."),
 
     // 사용자 관련 예외
-    EMAIL_ALREADY_EXISTS(CONFLICT, "이미 존재하는 이메일입니다.");
+    EMAIL_ALREADY_EXISTS(CONFLICT, "이미 존재하는 이메일입니다."),
+    USER_NOT_FOUND(NOT_FOUND, "사용자를 찾을 수 없습니다.");
 
     private final HttpStatus httpStatus; // HTTP 상태 코드
     private final String message; // 에러 메시지

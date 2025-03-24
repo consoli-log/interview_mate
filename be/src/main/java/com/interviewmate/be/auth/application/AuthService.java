@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * packageName    : com.interviewmate.be.auth.application
@@ -43,9 +44,11 @@ public class AuthService {
         Map<String, Object> claims = jwtTokenProvider.getClaims(refreshToken);
         String providerId = (String) claims.get("providerId");
 
+        log.info("RefreshToken 재발급 요청: providerId={}", providerId);
+
         // Redis에서 저장된 Refresh Token 확인
         String storedRefreshToken = tokenService.getRefreshToken(providerId);
-        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+        if (storedRefreshToken == null || !Objects.equals(storedRefreshToken, refreshToken)) {
             throw new CustomException(ErrorCode.TOKEN_NOT_FOUND);
         }
 
@@ -61,6 +64,7 @@ public class AuthService {
      */
     @Transactional
     public void logout(String providerId) {
+        log.info("RefreshToken 로그아웃 요청: providerId={}", providerId);
         tokenService.deleteRefreshToken(providerId);
     }
 

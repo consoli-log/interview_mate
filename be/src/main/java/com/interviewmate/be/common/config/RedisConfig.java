@@ -1,5 +1,6 @@
 package com.interviewmate.be.common.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -17,6 +18,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    private final String redisHost;
+    private final int redisPort;
+
+    public RedisConfig(
+            @Value("${spring.data.redis.host}") String redisHost,
+            @Value("${spring.data.redis.port}") int redisPort
+    ) {
+        this.redisHost = redisHost;
+        this.redisPort = redisPort;
+    }
+
     /**
      * methodName : redisConnectionFactory
      * description : Redis 연결 팩토리 설정
@@ -25,7 +37,7 @@ public class RedisConfig {
      */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory();
+        return new LettuceConnectionFactory(redisHost, redisPort);
     }
 
     /**
@@ -39,9 +51,10 @@ public class RedisConfig {
         RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
 
         redisTemplate.setConnectionFactory(connectionFactory);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());   // key: 문자열
+        redisTemplate.setValueSerializer(new StringRedisSerializer()); // value: 문자열
 
         return redisTemplate;
     }
+
 }

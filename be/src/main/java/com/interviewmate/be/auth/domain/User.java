@@ -6,8 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * packageName    : com.interviewmate.be.auth.domain
@@ -20,7 +25,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,6 +48,10 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt; // 등록일
 
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt; // 수정일
+
     /**
      * methodName : User
      * description : User 생성자 (Builder 패턴 적용)
@@ -58,6 +67,41 @@ public class User {
         this.name = name;
         this.providerId  = providerId ;
         this.provider = provider;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList(); // 권한 없다면 비워도 됨
+    }
+
+    @Override
+    public String getPassword() {
+        return null; // 소셜 로그인이라면 비밀번호 필요 없음
+    }
+
+    @Override
+    public String getUsername() {
+        return providerId; // 인증용 식별자
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
 }

@@ -1,6 +1,8 @@
 package com.interviewmate.be.auth.application;
 
 import com.interviewmate.be.auth.domain.User;
+import com.interviewmate.be.common.exception.CustomException;
+import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class UserService {
      * @param user 삭제할 사용자
      */
     public void deleteUser(User user) {
+        if (user == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
         userRepository.delete(user);
     }
 }

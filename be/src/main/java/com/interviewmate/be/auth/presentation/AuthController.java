@@ -54,11 +54,16 @@ public class AuthController {
     )
     public ResponseEntity<Map<String, String>> refreshToken(
             @RequestBody(description = "Refresh Token 요청 객체") RefreshTokenRequest request) {
+        log.info("요청 받은 Refresh Token: {}", request.getRefreshToken());
+
         if (request.getRefreshToken() == null || request.getRefreshToken().isBlank()) {
+            log.warn("Refresh Token 비어 있음");
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
 
         String newAccessToken = authService.refreshAccessToken(request.getRefreshToken());
+        log.info("새 Access Token 발급: {}", newAccessToken);
+
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 
