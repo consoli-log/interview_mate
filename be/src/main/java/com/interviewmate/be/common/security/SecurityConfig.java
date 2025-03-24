@@ -28,6 +28,8 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     /**
      * methodName : securityFilterChain
@@ -38,7 +40,7 @@ public class SecurityConfig {
      * @throws Exception 설정 중 발생할 수 있는 예외
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtAccessDeniedHandler jwtAccessDeniedHandler) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 // CSRF 비활성화 (JWT 기반이므로 필요 없음)
