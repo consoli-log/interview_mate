@@ -2,7 +2,6 @@ package com.interviewmate.be.question.application;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.infrastructure.openai.GeminiClient;
-import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
 import com.interviewmate.be.question.domain.Prompt;
 import com.interviewmate.be.question.domain.Question;

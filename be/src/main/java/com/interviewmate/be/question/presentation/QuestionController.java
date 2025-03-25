@@ -1,7 +1,6 @@
 package com.interviewmate.be.question.presentation;
 
 import com.interviewmate.be.auth.domain.User;
-import com.interviewmate.be.infrastructure.persistence.auth.UserRepository;
 import com.interviewmate.be.question.application.QuestionService;
 import com.interviewmate.be.question.dto.QuestionGenerateRequest;
 import com.interviewmate.be.question.dto.QuestionResponse;
