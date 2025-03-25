@@ -23,20 +23,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PromptController {
 
-    private final PromptService promptService;
-
-    /**
-     * methodName : savePrompt
-     * description : 프롬프트 저장 API
-     *
-     * @param promptRequest Prompt 저장 요청 DTO
-     * @return ResponseEntity<PromptResponse> 저장된 프롬프트 응답
-     */
-    @PostMapping
-    public ResponseEntity<PromptResponse> savePrompt(@RequestBody PromptRequest promptRequest) {
-        PromptResponse promptResponse = promptService.savePrompt(promptRequest);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(promptResponse);
-    }
 
 }
