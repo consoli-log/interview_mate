@@ -19,7 +19,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * description : 특정 프롬프트에 대한 질문 중 가장 큰 번호 조회 (isActive = true만)
      *
      * @param prompt 대상 프롬프트
-     * @return Integer 가장 큰 질문 번호 (없으면 null)
+     * @return Integer 가장 큰 질문 번호 (없으면 0)
      */
     @Query("SELECT COALESCE(MAX(q.number), 0) FROM Question q WHERE q.prompt = :prompt AND q.isActive = true")
     Integer findMaxNumberByPrompt(Prompt prompt);

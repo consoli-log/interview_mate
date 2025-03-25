@@ -3,8 +3,6 @@ package com.interviewmate.be.question.application;
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
 import com.interviewmate.be.question.domain.Prompt;
-import com.interviewmate.be.question.dto.PromptRequest;
-import com.interviewmate.be.question.dto.PromptResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
