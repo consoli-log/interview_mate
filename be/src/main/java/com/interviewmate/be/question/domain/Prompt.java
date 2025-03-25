@@ -1,5 +1,6 @@
 package com.interviewmate.be.question.domain;
 
+import com.interviewmate.be.auth.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,7 +25,12 @@ public class Prompt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "prompt_seq")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_seq")
+    private User user; // 사용자와의 연관 관계
 
     @Column(nullable = false)
     private String title;
@@ -35,7 +41,7 @@ public class Prompt {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt; // 등록일
+    private LocalDateTime createdAt; // 작성일
 
     @UpdateTimestamp
     @Column(name = "updated_at")
@@ -45,11 +51,13 @@ public class Prompt {
      * methodName : Prompt
      * description : Prompt 생성자 (Builder 패턴 적용)
      *
+     * @param user    연관된 사용자
      * @param title   요약 제목
      * @param prompt  프롬프트 내용
      */
     @Builder
-    public Prompt(String title, String prompt) {
+    public Prompt(User user, String title, String prompt) {
+        this.user = user;
         this.title = title;
         this.prompt = prompt;
     }

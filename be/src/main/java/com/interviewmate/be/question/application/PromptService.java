@@ -1,5 +1,6 @@
 package com.interviewmate.be.question.application;
 
+import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
 import com.interviewmate.be.question.domain.Prompt;
 import com.interviewmate.be.question.dto.PromptRequest;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * fileName       : PromptService
  * author         : eumsoli
  * date           : 2025-03-24
- * description    : 프롬프트 저장 비즈니스 로직을 담당하는 서비스
+ * description    : 프롬프트 저장 및 관련 로직을 담당하는 서비스
  */
 @Service
 @RequiredArgsConstructor
@@ -23,24 +24,23 @@ public class PromptService {
 
     /**
      * methodName : savePrompt
-     * description : 프롬프트를 저장하고 임시 제목을 생성한다.
+     * description : 프롬프트 저장 및 요약 제목 생성 처리
      *
-     * @param promptRequest Prompt 저장 요청 DTO
-     * @return Prompt 저장 응답 DTO
+     * @param user 사용자
+     * @param promptContent 사용자 입력 프롬프트
+     * @return Prompt 저장된 프롬프트 엔티티
      */
     @Transactional
-    public PromptResponse savePrompt(PromptRequest promptRequest) {
-        // TODO Gemini API 연동 후 생성된 요약 제목으로 대체
-        String tempTitle = summarizeTitle(promptRequest.prompt());
+    public Prompt savePrompt(User user, String promptContent) {
+        String title = summarizeTitle(promptContent);
 
         Prompt prompt = Prompt.builder()
-                .title(tempTitle)
-                .prompt(promptRequest.prompt())
+                .user(user)
+                .title(title)
+                .prompt(promptContent)
                 .build();
 
-        Prompt saved = promptRepository.save(prompt);
-
-        return new PromptResponse(saved.getId(), saved.getTitle(), saved.getPrompt(), saved.getCreatedAt());
+        return promptRepository.save(prompt);
     }
 
     /**
