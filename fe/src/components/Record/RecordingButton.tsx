@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { RecordingState, useRecording } from "@/hooks/useRecording";
 import clsx from "clsx";
+import Button from "../common/Button/Button";
+import { RecordingState, useRecording } from "@/hooks/useRecording";
 
 interface RecordingButtonProps {
   maxDuration?: number;
@@ -82,11 +83,13 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
 
   return (
     <div className="flex flex-col items-start">
-      <button
+      <Button
+        variant="secondary"
         className={clsx(
-          "flex items-center px-6 py-3 rounded-full border-none bg-gray-100",
+          "flex items-center px-6 py-3 rounded-full",
           "cursor-pointer transition-all duration-200 ease-in-out",
           "font-medium text-base text-black-100",
+          "bg-gray-100 border-none",
           className
         )}
         onClick={handleClick}
@@ -95,15 +98,16 @@ const RecordingButton: React.FC<RecordingButtonProps> = ({
           className={clsx("w-6 h-6 rounded-full mr-2", getIconColorClass())}
         />
         <span>{getButtonText()}</span>
-      </button>
+      </Button>
 
       {state === "recording" && (
-        <button
+        <Button
+          variant="secondary"
           onClick={cancelRecording}
-          className="mt-2 ml-1 bg-transparent border-none text-red-100 cursor-pointer text-sm px-2 py-1"
+          className="mt-2 ml-1 bg-transparent border-none text-red-100 cursor-pointer text-sm px-2 py-1 hover:bg-transparent"
         >
           취소
-        </button>
+        </Button>
       )}
     </div>
   );
