@@ -42,13 +42,13 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
      * description : 특정 프롬프트의 활성화된 질문들을 번호 순으로 조회
      *
      * @param prompt 대상 프롬프트
-     * @return List<Question>
+     * @return List<Question> 활성화된 질문 리스트
      */
     List<Question> findAllByPromptAndIsActiveTrueOrderByNumber(Prompt prompt);
 
     /**
      * methodName : deleteByIsActiveFalseAndUpdatedAtBefore
-     * description : 비활성화 상태이고 지정된 시각보다 오래된 질문을 삭제한다.
+     * description : 비활성화 상태이고 지정된 시각보다 오래된 질문을 삭제
      *
      * @param updatedAt 삭제 기준 시간
      * @return int 삭제된 질문 수

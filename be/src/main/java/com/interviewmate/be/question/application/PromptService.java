@@ -2,10 +2,14 @@ package com.interviewmate.be.question.application;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
+import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
 import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.question.dto.PromptListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * packageName    : com.interviewmate.be.question.application
@@ -50,6 +54,29 @@ public class PromptService {
      */
     private String summarizeTitle(String prompt) {
         return prompt.length() > 20 ? prompt.substring(0, 20) + "..." : prompt;
+    }
+
+    /**
+     * methodName : getPromptList
+     * description : 로그인 사용자의 프롬프트 목록을 조회
+     *
+     * @param user 로그인 사용자
+     * @return List<PromptListResponse> 프롬프트 목록 응답 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<PromptListResponse> getPromptList(User user) {
+        List<Prompt> prompts = promptRepository.findAllByUserAndIsActiveTrueOrderByCreatedAtDesc(user);
+
+        return prompts.stream()
+                .map(prompt -> {
+                    return new PromptListResponse(
+                            prompt.getId(),
+                            prompt.getTitle(),
+                            prompt.getPrompt(),
+                            prompt.getCreatedAt()
+                    );
+                })
+                .toList();
     }
 
 }
