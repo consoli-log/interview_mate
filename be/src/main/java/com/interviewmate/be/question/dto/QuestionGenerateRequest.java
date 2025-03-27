@@ -5,7 +5,7 @@ package com.interviewmate.be.question.dto;
  * fileName       : QuestionGenerateRequest
  * author         : eumsoli
  * date           : 2025-03-25
- * description    : Gemini 기반 질문 생성 요청 DTO
+ * description    : 질문 생성 요청 DTO
  */
 public record QuestionGenerateRequest(
 

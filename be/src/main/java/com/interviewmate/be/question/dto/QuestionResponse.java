@@ -5,7 +5,7 @@ package com.interviewmate.be.question.dto;
  * fileName       : QuestionResponse
  * author         : eumsoli
  * date           : 2025-03-25
- * description    : Gemini 기반 생성된 질문 응답 DTO
+ * description    : 생성된 질문 응답 DTO
  */
 public record QuestionResponse(
 
