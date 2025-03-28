@@ -72,7 +72,7 @@ public class QuestionController {
 
     /**
      * methodName : regenerateQuestion
-     * description : 비활성화된 질문이 존재하면 새 질문을 하나 생성한다.
+     * description : 비활성화된 질문이 존재하면 새 질문을 하나 생성
      *
      * @param request 재생성 요청 DTO
      * @param user    로그인 사용자

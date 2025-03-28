@@ -39,6 +39,9 @@ public class Prompt {
     @Column(nullable = false)
     private String prompt;
 
+    @Column(name = "is_active")
+    private boolean isActive; // 비활성화 여부
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt; // 작성일
@@ -60,6 +63,15 @@ public class Prompt {
         this.user = user;
         this.title = title;
         this.prompt = prompt;
+        this.isActive = true;
+    }
+
+    /**
+     * methodName : deactivate
+     * description : 프롬프트를 비활성화 상태로 변경
+     */
+    public void deactivate() {
+        this.isActive = false;
     }
 
 }

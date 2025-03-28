@@ -49,13 +49,14 @@ public enum ErrorCode {
 
     // 프롬프트 관련 예외
     PROMPT_NOT_FOUND(NOT_FOUND, "프롬프트를 찾을 수 없습니다."),
+    PROMPT_NOT_OWNED(FORBIDDEN, "해당 프롬프트를 삭제할 권한이 없습니다."),
+    PROMPT_ALREADY_DEACTIVATED(BAD_REQUEST, "이미 비활성화된 프롬프트입니다."),
 
     // 질문 관련 예외
     QUESTION_NOT_FOUND(NOT_FOUND, "질문을 찾을 수 없습니다."),
     QUESTION_ALREADY_DEACTIVATED(BAD_REQUEST, "이미 비활성화된 질문입니다."),
     QUESTION_NOT_OWNED(FORBIDDEN, "해당 질문을 삭제할 권한이 없습니다."),
     QUESTION_REGENERATION_NOT_ALLOWED(BAD_REQUEST, "재생성할 수 있는 질문이 없습니다."),
-
 
     // 공통 관련 예외
     LOGIN_REQUIRED(UNAUTHORIZED, "로그인이 필요한 기능입니다. 로그인 후 다시 시도해 주세요."),

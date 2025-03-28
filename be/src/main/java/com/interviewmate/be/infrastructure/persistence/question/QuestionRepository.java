@@ -38,6 +38,15 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     boolean existsByPromptAndIsActiveFalse(Prompt prompt);
 
     /**
+     * methodName : findAllByPromptAndIsActiveTrue
+     * description : 해당 프롬프트에 속한 활성 질문들을 조회
+     *
+     * @param prompt 프롬프트 엔티티
+     * @return List<Question> 활성 질문 리스트
+     */
+    List<Question> findAllByPromptAndIsActiveTrue(Prompt prompt);
+
+    /**
      * methodName : findAllByPromptAndIsActiveTrueOrderByNumber
      * description : 특정 프롬프트의 활성화된 질문들을 번호 순으로 조회
      *

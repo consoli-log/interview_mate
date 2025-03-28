@@ -1,9 +1,12 @@
 package com.interviewmate.be.question.application;
 
 import com.interviewmate.be.auth.domain.User;
+import com.interviewmate.be.common.exception.CustomException;
+import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
 import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.question.domain.Question;
 import com.interviewmate.be.question.dto.PromptListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ import java.util.List;
 public class PromptService {
 
     private final PromptRepository promptRepository;
+    private final QuestionRepository questionRepository;
 
     /**
      * methodName : savePrompt
@@ -77,6 +81,37 @@ public class PromptService {
                     );
                 })
                 .toList();
+    }
+
+    /**
+     * methodName : deactivatePrompt
+     * description : 프롬프트와 연관된 질문들을 함께 비활성화 처리
+     *
+     * @param promptId 프롬프트 ID
+     * @param user 로그인 사용자
+     * @throws CustomException 존재하지 않거나 소유자가 다르거나 이미 비활성화된 경우
+     */
+    @Transactional
+    public void deactivatePrompt(Long promptId, User user) {
+        Prompt prompt = promptRepository.findById(promptId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+
+        // 사용자 자신의 프롬프트인 지 확인
+        if (!prompt.getUser().getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.PROMPT_NOT_OWNED);
+        }
+
+        // 이미 비활성화 되었는 지 확인
+        if (!prompt.isActive()) {
+            throw new CustomException(ErrorCode.PROMPT_ALREADY_DEACTIVATED);
+        }
+
+        // 프롬프트 비활성화
+        prompt.deactivate();
+
+        // 연결된 질문 모두 비활성화
+        List<Question> questions = questionRepository.findAllByPromptAndIsActiveTrue(prompt);
+        questions.forEach(Question::deactivate);
     }
 
 }
