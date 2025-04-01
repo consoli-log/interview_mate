@@ -1,9 +1,9 @@
-package com.interviewmate.be.question.dto;
+package com.interviewmate.be.prompt.dto;
 
 import java.time.LocalDateTime;
 
 /**
- * packageName    : com.interviewmate.be.question.dto
+ * packageName    : com.interviewmate.be.prompt.dto
  * fileName       : PromptListResponse
  * author         : eumsoli
  * date           : 2025-03-27

@@ -1,10 +1,10 @@
-package com.interviewmate.be.question.presentation;
+package com.interviewmate.be.prompt.presentation;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.question.application.PromptService;
-import com.interviewmate.be.question.dto.PromptListResponse;
+import com.interviewmate.be.prompt.application.PromptService;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 /**
- * packageName    : com.interviewmate.be.question.presentation
+ * packageName    : com.interviewmate.be.prompt.presentation
  * fileName       : PromptControllerTest
  * author         : eumsoli
  * date           : 2025-03-30
- * description    : PromptController의 API를 테스트하는 클래스
+ * description    : PromptController의 API 동작을 단위 테스트하는 클래스
  */
 @ExtendWith(MockitoExtension.class)
 class PromptControllerTest {

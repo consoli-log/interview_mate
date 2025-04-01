@@ -1,4 +1,4 @@
-package com.interviewmate.be.question.domain;
+package com.interviewmate.be.prompt.domain;
 
 import com.interviewmate.be.auth.domain.User;
 import jakarta.persistence.*;
@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * packageName    : com.interviewmate.be.question.domain
+ * packageName    : com.interviewmate.be.prompt.domain
  * fileName       : Prompt
  * author         : eumsoli
  * date           : 2025-03-24

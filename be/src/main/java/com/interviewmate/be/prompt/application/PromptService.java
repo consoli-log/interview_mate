@@ -1,13 +1,13 @@
-package com.interviewmate.be.question.application;
+package com.interviewmate.be.prompt.application;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
+import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
-import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.prompt.domain.Prompt;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import com.interviewmate.be.question.domain.Question;
-import com.interviewmate.be.question.dto.PromptListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * packageName    : com.interviewmate.be.question.application
+ * packageName    : com.interviewmate.be.prompt.application
  * fileName       : PromptService
  * author         : eumsoli
  * date           : 2025-03-24
@@ -98,7 +98,7 @@ public class PromptService {
 
         // 사용자 자신의 프롬프트인 지 확인
         if (!prompt.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.PROMPT_NOT_OWNED);
+            throw new CustomException(ErrorCode.PROMPT_ACCESS_DENIED);
         }
 
         // 이미 비활성화 되었는 지 확인

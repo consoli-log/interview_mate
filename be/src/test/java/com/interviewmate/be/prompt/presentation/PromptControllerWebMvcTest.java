@@ -1,11 +1,11 @@
-package com.interviewmate.be.question.presentation;
+package com.interviewmate.be.prompt.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.question.application.PromptService;
-import com.interviewmate.be.question.dto.PromptListResponse;
+import com.interviewmate.be.prompt.application.PromptService;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * packageName    : com.interviewmate.be.question.presentation
+ * packageName    : com.interviewmate.be.prompt.presentation
  * fileName       : PromptControllerWebMvcTest
  * author         : eumsoli
  * date           : 2025-03-30

@@ -1,7 +1,7 @@
-package com.interviewmate.be.infrastructure.persistence.question;
+package com.interviewmate.be.infrastructure.persistence.prompt;
 
 import com.interviewmate.be.auth.domain.User;
-import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.prompt.domain.Prompt;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

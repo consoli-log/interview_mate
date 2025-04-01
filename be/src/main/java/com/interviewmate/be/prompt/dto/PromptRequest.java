@@ -1,7 +1,7 @@
-package com.interviewmate.be.question.dto;
+package com.interviewmate.be.prompt.dto;
 
 /**
- * packageName    : com.interviewmate.be.question.dto
+ * packageName    : com.interviewmate.be.prompt.dto
  * fileName       : PromptRequest
  * author         : eumsoli
  * date           : 2025-03-24

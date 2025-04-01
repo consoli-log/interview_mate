@@ -1,13 +1,13 @@
-package com.interviewmate.be.question.application;
+package com.interviewmate.be.prompt.application;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
+import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
-import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.prompt.domain.Prompt;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import com.interviewmate.be.question.domain.Question;
-import com.interviewmate.be.question.dto.PromptListResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -32,7 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 /**
- * packageName    : com.interviewmate.be.question.application
+ * packageName    : com.interviewmate.be.prompt.application
  * fileName       : PromptServiceTest
  * author         : eumsoli
  * date           : 2025-03-28
@@ -231,8 +231,8 @@ class PromptServiceTest {
                     .isInstanceOf(CustomException.class)
                     .satisfies(ex -> {
                         CustomException customEx = (CustomException) ex;
-                        assertThat(customEx.getMessage()).isEqualTo(ErrorCode.PROMPT_NOT_OWNED.getMessage());
-                        assertThat(customEx.getHttpStatus()).isEqualTo(ErrorCode.PROMPT_NOT_OWNED.getHttpStatus());
+                        assertThat(customEx.getMessage()).isEqualTo(ErrorCode.PROMPT_ACCESS_DENIED.getMessage());
+                        assertThat(customEx.getHttpStatus()).isEqualTo(ErrorCode.PROMPT_ACCESS_DENIED.getHttpStatus());
                     });
 
             verify(promptRepository, times(1)).findById(3L);

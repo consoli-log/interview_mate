@@ -1,13 +1,13 @@
-package com.interviewmate.be.question.presentation;
+package com.interviewmate.be.prompt.presentation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.security.JwtTokenProvider;
-import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
+import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
-import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.prompt.domain.Prompt;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import com.interviewmate.be.question.domain.Question;
-import com.interviewmate.be.question.dto.PromptListResponse;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * packageName    : com.interviewmate.be.question.presentation
+ * packageName    : com.interviewmate.be.prompt.presentation
  * fileName       : RealPromptControllerIntegrationTest
  * author         : eumsoli
  * date           : 2025-03-30

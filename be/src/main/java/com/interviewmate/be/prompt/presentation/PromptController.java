@@ -1,10 +1,10 @@
-package com.interviewmate.be.question.presentation;
+package com.interviewmate.be.prompt.presentation;
 
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
-import com.interviewmate.be.question.application.PromptService;
-import com.interviewmate.be.question.dto.PromptListResponse;
+import com.interviewmate.be.prompt.application.PromptService;
+import com.interviewmate.be.prompt.dto.PromptListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * packageName    : com.interviewmate.be.question.presentation
+ * packageName    : com.interviewmate.be.prompt.presentation
  * fileName       : PromptController
  * author         : eumsoli
  * date           : 2025-03-24
