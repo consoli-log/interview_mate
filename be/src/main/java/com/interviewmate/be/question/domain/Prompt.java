@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "prompts")
 public class Prompt {
 
     @Id
@@ -29,7 +30,7 @@ public class Prompt {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_seq")
+    @JoinColumn(name = "user_seq", nullable = false)
     private User user; // 사용자와의 연관 관계
 
     @Column(nullable = false)
