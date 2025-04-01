@@ -164,7 +164,7 @@ class PromptControllerTest {
         }
 
         @Test
-        @DisplayName("존재하지 않는 프롬프트 ID로 요청하면 서비스에서 적절한 예외가 발생한다")
+        @DisplayName("존재하지 않는 프롬프트 ID로 요청하면 예외가 발생한다")
         void deactivatePrompt_NonexistentPromptId_ServiceThrowsException() {
             // Given
             long nonExistentPromptId = 999L;
@@ -184,7 +184,7 @@ class PromptControllerTest {
         }
 
         @Test
-        @DisplayName("다른 사용자의 프롬프트를 삭제하려고 하면 서비스에서 적절한 예외가 발생한다")
+        @DisplayName("다른 사용자의 프롬프트를 삭제하려고 하면 예외가 발생한다")
         void deactivatePrompt_PromptOwnedByAnotherUser_ServiceThrowsException() {
             // Given
             long promptIdOwnedByAnotherUser = 2L;
@@ -204,7 +204,7 @@ class PromptControllerTest {
         }
 
         @Test
-        @DisplayName("이미 비활성화된 프롬프트를 삭제하려고 하면 서비스에서 적절한 예외가 발생한다")
+        @DisplayName("이미 비활성화된 프롬프트를 삭제하려고 하면 예외가 발생한다")
         void deactivatePrompt_AlreadyDeactivatedPrompt_ServiceThrowsException() {
             // Given
             long deactivatedPromptId = 3L;
