@@ -188,7 +188,7 @@ class PromptControllerTest {
         void deactivatePrompt_PromptOwnedByAnotherUser_ServiceThrowsException() {
             // Given
             long promptIdOwnedByAnotherUser = 2L;
-            doThrow(new CustomException(ErrorCode.PROMPT_NOT_OWNED))
+            doThrow(new CustomException(ErrorCode.PROMPT_ACCESS_DENIED))
                     .when(promptService).deactivatePrompt(eq(promptIdOwnedByAnotherUser), eq(mockUser));
 
             // When & Then
@@ -196,8 +196,8 @@ class PromptControllerTest {
                     .isInstanceOf(CustomException.class)
                     .satisfies(ex -> {
                         CustomException customEx = (CustomException) ex;
-                        assertThat(customEx.getMessage()).isEqualTo(ErrorCode.PROMPT_NOT_OWNED.getMessage());
-                        assertThat(customEx.getHttpStatus()).isEqualTo(ErrorCode.PROMPT_NOT_OWNED.getHttpStatus());
+                        assertThat(customEx.getMessage()).isEqualTo(ErrorCode.PROMPT_ACCESS_DENIED.getMessage());
+                        assertThat(customEx.getHttpStatus()).isEqualTo(ErrorCode.PROMPT_ACCESS_DENIED.getHttpStatus());
                     });
 
             verify(promptService, times(1)).deactivatePrompt(promptIdOwnedByAnotherUser, mockUser);
