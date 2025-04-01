@@ -216,7 +216,7 @@ class PromptControllerWebMvcTest {
         void deactivatePrompt_PromptOwnedByAnotherUser_Returns403Forbidden() throws Exception {
             // Given
             long promptIdOwnedByAnotherUser = 2L;
-            doThrow(new CustomException(ErrorCode.PROMPT_NOT_OWNED))
+            doThrow(new CustomException(ErrorCode.PROMPT_ACCESS_DENIED))
                     .when(promptService).deactivatePrompt(eq(promptIdOwnedByAnotherUser), any(User.class));
 
             // When & Then
