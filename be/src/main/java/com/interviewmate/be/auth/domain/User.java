@@ -21,9 +21,9 @@ import java.util.Collections;
  * date           : 2025-03-17
  * description    : 사용자 엔티티 클래스
  */
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
 @Table(name = "users")
 public class User implements UserDetails {
 
@@ -65,7 +65,7 @@ public class User implements UserDetails {
     public User(String email, String name, String providerId, String provider) {
         this.email = email;
         this.name = name;
-        this.providerId  = providerId ;
+        this.providerId = providerId ;
         this.provider = provider;
     }
 

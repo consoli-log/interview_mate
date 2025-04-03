@@ -53,7 +53,7 @@ class PromptControllerTest {
 
         // Mock 사용자 생성
         mockUser = User.builder()
-                .email("test@example.com")
+                .email("soli@test.com")
                 .name("테스트 사용자")
                 .build();
 
