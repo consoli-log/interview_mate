@@ -1,6 +1,5 @@
 package com.interviewmate.be.prompt.presentation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
@@ -17,7 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -39,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * fileName       : PromptControllerWebMvcTest
  * author         : eumsoli
  * date           : 2025-03-30
- * description    : PromptController의 웹 계층의 동작을 슬라이스 테스트하는 클래스
+ * description    : PromptController의 API를 WebMvcTest 환경에서 검증하는 테스트 클래스
  */
 @WebMvcTest(PromptController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -47,9 +45,6 @@ class PromptControllerWebMvcTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private PromptService promptService;
@@ -94,7 +89,6 @@ class PromptControllerWebMvcTest {
 
         @Test
         @DisplayName("인증된 사용자는 프롬프트 목록을 성공적으로 조회한다")
-        @WithMockUser
         void getPromptList_AuthenticatedUser_ReturnsOkWithPromptList() throws Exception {
             // Given
             given(promptService.getPromptList(any(User.class))).willReturn(mockPromptList);
@@ -118,7 +112,6 @@ class PromptControllerWebMvcTest {
 
         @Test
         @DisplayName("인증된 사용자의 프롬프트가 없는 경우 빈 목록을 반환한다")
-        @WithMockUser("soli")
         void getPromptList_AuthenticatedUserWithNoPrompts_ReturnsOkWithEmptyList() throws Exception {
             // Given
             given(promptService.getPromptList(any(User.class))).willReturn(Collections.emptyList());
@@ -156,8 +149,7 @@ class PromptControllerWebMvcTest {
     class DeactivatePromptTest {
 
         @Test
-        @DisplayName("인증된 사용자는 프롬프트를 성공적으로 비활성화한다")
-        @WithMockUser("soli")
+        @DisplayName("인증된 사용자는 본인 프롬프트를 성공적으로 비활성화한다")
         void deactivatePrompt_AuthenticatedUser_Returns204NoContent() throws Exception {
             // Given
             long promptId = 1L;
@@ -192,7 +184,6 @@ class PromptControllerWebMvcTest {
 
         @Test
         @DisplayName("존재하지 않는 프롬프트 ID로 요청하면 404 Not Found를 반환한다")
-        @WithMockUser("soli")
         void deactivatePrompt_NonexistentPromptId_Returns404NotFound() throws Exception {
             // Given
             long nonExistentPromptId = 999L;
@@ -212,7 +203,6 @@ class PromptControllerWebMvcTest {
 
         @Test
         @DisplayName("다른 사용자의 프롬프트를 삭제하려고 하면 403 Forbidden을 반환한다")
-        @WithMockUser("soli")
         void deactivatePrompt_PromptOwnedByAnotherUser_Returns403Forbidden() throws Exception {
             // Given
             long promptIdOwnedByAnotherUser = 2L;
@@ -232,7 +222,6 @@ class PromptControllerWebMvcTest {
 
         @Test
         @DisplayName("이미 비활성화된 프롬프트를 삭제하려고 하면 400 Bad Request를 반환한다")
-        @WithMockUser("soli")
         void deactivatePrompt_AlreadyDeactivatedPrompt_Returns400BadRequest() throws Exception {
             // Given
             long deactivatedPromptId = 3L;

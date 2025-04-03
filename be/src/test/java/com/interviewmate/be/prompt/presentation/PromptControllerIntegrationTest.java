@@ -62,9 +62,9 @@ class PromptControllerIntegrationTest {
     @Autowired
     private EntityManager entityManager;
 
-    private User testUser;
-    private Prompt testPrompt;
-    private Question testQuestion;
+    private User mockUser;
+    private Prompt mockPrompt;
+    private Question mockQuestion;
     private String accessToken;
 
     private User anotherUser;
@@ -73,21 +73,21 @@ class PromptControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         // 테스트 사용자 생성
-        testUser = User.builder()
+        mockUser = User.builder()
                 .email("soli@test.com")
                 .name("통합테스트 사용자")
                 .providerId("1234567890")
                 .provider("google")
                 .build();
-        entityManager.persist(testUser);
+        entityManager.persist(mockUser);
         entityManager.flush();
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("id", testUser.getId());
-        claims.put("email", testUser.getEmail());
-        claims.put("name", testUser.getName());
-        claims.put("providerId", testUser.getProviderId());
-        claims.put("provider", testUser.getProvider());
+        claims.put("id", mockUser.getId());
+        claims.put("email", mockUser.getEmail());
+        claims.put("name", mockUser.getName());
+        claims.put("providerId", mockUser.getProviderId());
+        claims.put("provider", mockUser.getProvider());
 
         // JWT 토큰 생성
         accessToken = jwtTokenProvider.generateAccessToken(claims);
@@ -112,23 +112,23 @@ class PromptControllerIntegrationTest {
         anotherToken = jwtTokenProvider.generateAccessToken(anotherClaims);
 
         // 테스트 프롬프트 생성
-        testPrompt = Prompt.builder()
-                .user(testUser)
+        mockPrompt = Prompt.builder()
+                .user(mockUser)
                 .title("테스트 프롬프트 제목")
                 .prompt("테스트 프롬프트 내용")
                 .build();
 
         // isActive 필드는 setter가 없고 비즈니스 로직에서만 변경됨 → 테스트 목적상 직접 주입
-        ReflectionTestUtils.setField(testPrompt, "isActive", true);
-        promptRepository.save(testPrompt);
+        ReflectionTestUtils.setField(mockPrompt, "isActive", true);
+        promptRepository.save(mockPrompt);
 
         // 테스트 질문 생성
-        testQuestion = Question.builder()
-                .prompt(testPrompt)
+        mockQuestion = Question.builder()
+                .prompt(mockPrompt)
                 .question("테스트 질문 내용")
                 .build();
-        ReflectionTestUtils.setField(testQuestion, "isActive", true);
-        questionRepository.save(testQuestion);
+        ReflectionTestUtils.setField(mockQuestion, "isActive", true);
+        questionRepository.save(mockQuestion);
 
         entityManager.flush();
     }
@@ -144,8 +144,8 @@ class PromptControllerIntegrationTest {
     void getPromptList_WithAuthenticatedUser_ReturnsPromptList() throws Exception {
         // When & Then
         MvcResult result = mockMvc.perform(get("/api/prompts")
-                        .requestAttr("user", testUser)
-                        .principal(() -> testUser.getId().toString())
+                        .requestAttr("user", mockUser)
+                        .principal(() -> mockUser.getId().toString())
                         .header("Authorization", "Bearer " + accessToken)
                         .characterEncoding("UTF-8")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -171,9 +171,9 @@ class PromptControllerIntegrationTest {
     @Transactional
     void deactivatePrompt_WithAuthenticatedUser_DeactivatesPromptAndQuestions() throws Exception {
         // When
-        mockMvc.perform(delete("/api/prompts/" + testPrompt.getId())
-                        .requestAttr("user", testUser)
-                        .principal(() -> testUser.getId().toString())
+        mockMvc.perform(delete("/api/prompts/" + mockPrompt.getId())
+                        .requestAttr("user", mockUser)
+                        .principal(() -> mockUser.getId().toString())
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent())
@@ -183,8 +183,8 @@ class PromptControllerIntegrationTest {
         entityManager.flush();
         entityManager.clear(); // 영속성 컨텍스트 초기화하여 DB에서 새로 조회
 
-        Prompt deactivatedPrompt = promptRepository.findById(testPrompt.getId()).orElseThrow();
-        Question deactivatedQuestion = questionRepository.findById(testQuestion.getId()).orElseThrow();
+        Prompt deactivatedPrompt = promptRepository.findById(mockPrompt.getId()).orElseThrow();
+        Question deactivatedQuestion = questionRepository.findById(mockQuestion.getId()).orElseThrow();
 
         assertThat(deactivatedPrompt.isActive()).isFalse();
         assertThat(deactivatedQuestion.isActive()).isFalse();
@@ -195,7 +195,7 @@ class PromptControllerIntegrationTest {
     @Transactional
     void deactivatePrompt_WithDifferentUser_ReturnsForbidden() throws Exception {
         // When & Then
-        mockMvc.perform(delete("/api/prompts/" + testPrompt.getId())
+        mockMvc.perform(delete("/api/prompts/" + mockPrompt.getId())
                         .requestAttr("user", anotherUser)
                         .principal(() -> anotherUser.getId().toString())
                         .header("Authorization", "Bearer " + anotherToken)
@@ -207,8 +207,8 @@ class PromptControllerIntegrationTest {
         // Then - 프롬프트와 질문이 여전히 활성화 상태인지 확인
         entityManager.clear();
 
-        Prompt prompt = promptRepository.findById(testPrompt.getId()).orElseThrow();
-        Question question = questionRepository.findById(testQuestion.getId()).orElseThrow();
+        Prompt prompt = promptRepository.findById(mockPrompt.getId()).orElseThrow();
+        Question question = questionRepository.findById(mockQuestion.getId()).orElseThrow();
 
         assertThat(prompt.isActive()).isTrue();
         assertThat(question.isActive()).isTrue();
@@ -223,8 +223,8 @@ class PromptControllerIntegrationTest {
 
         // When & Then
         mockMvc.perform(delete("/api/prompts/" + nonExistentId)
-                        .requestAttr("user", testUser)
-                        .principal(() -> testUser.getId().toString())
+                        .requestAttr("user", mockUser)
+                        .principal(() -> mockUser.getId().toString())
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -237,15 +237,16 @@ class PromptControllerIntegrationTest {
     @Transactional
     void deactivatePrompt_WithAlreadyDeactivatedPrompt_ReturnsBadRequest() throws Exception {
         // Given - 프롬프트 비활성화
-        testPrompt.deactivate();
-        promptRepository.save(testPrompt);
+        mockPrompt.deactivate();
+
+        promptRepository.save(mockPrompt);
         entityManager.flush();
         entityManager.clear();
 
         // When & Then
-        mockMvc.perform(delete("/api/prompts/" + testPrompt.getId())
-                        .requestAttr("user", testUser)
-                        .principal(() -> testUser.getId().toString())
+        mockMvc.perform(delete("/api/prompts/" + mockPrompt.getId())
+                        .requestAttr("user", mockUser)
+                        .principal(() -> mockUser.getId().toString())
                         .header("Authorization", "Bearer " + accessToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
