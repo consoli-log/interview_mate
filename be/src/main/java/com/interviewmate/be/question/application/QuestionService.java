@@ -4,9 +4,10 @@ import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.infrastructure.openai.GeminiClient;
-import com.interviewmate.be.infrastructure.persistence.question.PromptRepository;
+import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
-import com.interviewmate.be.question.domain.Prompt;
+import com.interviewmate.be.prompt.application.PromptService;
+import com.interviewmate.be.prompt.domain.Prompt;
 import com.interviewmate.be.question.domain.Question;
 import com.interviewmate.be.question.dto.QuestionGenerateRequest;
 import com.interviewmate.be.question.dto.QuestionListResponse;
@@ -94,7 +95,7 @@ public class QuestionService {
 
         // 사용자 자신의 프롬프트인 지 확인
         if (!question.getPrompt().getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.QUESTION_NOT_OWNED);
+            throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
         }
 
         // 이미 비활성화 되었는 지 확인
@@ -119,7 +120,7 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
         if (!prompt.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.QUESTION_NOT_OWNED);
+            throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
         }
 
         // 비활성화된 질문이 존재하는지 확인
@@ -157,7 +158,7 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
         if (!prompt.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.QUESTION_NOT_OWNED);
+            throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
         }
 
         List<Question> questions = questionRepository.findAllByPromptAndIsActiveTrueOrderByNumber(prompt);

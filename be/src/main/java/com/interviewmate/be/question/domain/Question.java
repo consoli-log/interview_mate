@@ -1,5 +1,6 @@
 package com.interviewmate.be.question.domain;
 
+import com.interviewmate.be.prompt.domain.Prompt;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "questions")
 public class Question {
 
     @Id
@@ -31,9 +33,11 @@ public class Question {
     @JoinColumn(name = "prompt_seq", nullable = false)
     private Prompt prompt; // 프롬프트와의 연관 관계
 
+    @Column(nullable = false)
     private int number; // 프롬프트 내 질문 번호 (1~5, 혹은 6...)
 
     @Lob
+    @Column(nullable = false)
     private String question; // 질문
 
     @Column(name = "is_active")
