@@ -1,7 +1,7 @@
 import React from "react";
 import { ButtonHTMLAttributes } from "react";
 import Image from "next/image";
-import { Button } from "../common";
+import { Button } from "@/components/ui/button";
 
 /**
  * 사이드바 버튼 Props 타입
@@ -22,7 +22,6 @@ export default function SidebarButton({
 }: SidebarButtonProps) {
   return (
     <Button
-      variant="primary"
       disabled={disabled}
       className={`w-full mb-3 text-lg ${className}`}
       {...rest}

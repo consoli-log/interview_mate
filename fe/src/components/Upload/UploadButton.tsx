@@ -1,7 +1,7 @@
 import React from "react";
 import { ButtonHTMLAttributes } from "react";
 import Image from "next/image";
-import { BaseButton } from "../common";
+import { Button } from "../ui/button";
 
 export type UploadButtonVariant = "primary" | "secondary" | "ghost";
 
@@ -31,7 +31,7 @@ export default function UploadButton({
   const buttonStyle = disabled ? DISABLED_STYLE : VARIANT_STYLES[variant];
 
   return (
-    <BaseButton
+    <Button
       className={`w-12 h-12 rounded-full p-0 flex items-center justify-center ${buttonStyle} ${className}`}
       disabled={disabled}
       {...rest}
@@ -42,6 +42,6 @@ export default function UploadButton({
         width={ICON_SIZE}
         height={ICON_SIZE}
       />
-    </BaseButton>
+    </Button>
   );
 }

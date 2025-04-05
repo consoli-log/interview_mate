@@ -1,6 +1,6 @@
 import React from "react";
 import { ButtonHTMLAttributes } from "react";
-import { Button } from "@/components/common";
+import { Button } from "@/components/ui/button";
 
 /**
  * 로그인 CTA 버튼 Props 타입
@@ -22,7 +22,6 @@ export default function LoginButton({
 }: LoginButtonProps) {
   return (
     <Button
-      variant="primary"
       disabled={disabled || isLoading}
       className={`px-6 mb-2 ${className}`}
       {...rest}

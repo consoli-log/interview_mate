@@ -1,6 +1,6 @@
 import React from "react";
 import { ButtonHTMLAttributes } from "react";
-import { Button } from "@/components/common";
+import { Button } from "@/components/ui/button";
 
 /**
  * 회원가입 CTA 버튼 Props 타입

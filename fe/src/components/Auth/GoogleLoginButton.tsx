@@ -1,7 +1,7 @@
 import React from "react";
 import { ButtonHTMLAttributes } from "react";
 import Image from "next/image";
-import { Button } from "@/components/common";
+import { Button } from "../ui/button";
 
 /**
  * 구글 로그인 버튼 Props 타입

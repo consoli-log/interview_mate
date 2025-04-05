@@ -1,7 +1,6 @@
-import React from "react";
 import ExampleUsage from "./RecordingTest";
 
-export default function Main() {
+export default function Page() {
   return (
     <div>
       <ExampleUsage />
