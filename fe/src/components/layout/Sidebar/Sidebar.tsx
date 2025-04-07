@@ -16,7 +16,7 @@ export const Sidebar = ({ onAddPost, posts, onPostClick }: SidebarProps) => {
           onClick={onAddPost}
           className="w-full p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
-          포스트 추가하기
+          포폴 추가하기
         </button>
       )}
       <List>
