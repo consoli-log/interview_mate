@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/hooks/useAuth";
 import Header from "@/layouts/Header";
+import ClientSidebar from "@/layouts/Sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +32,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Header />
-          <main>{children}</main>
+          <div className="flex h-[calc(100vh-64px)]">
+            <ClientSidebar />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
         </AuthProvider>
       </body>
     </html>
