@@ -53,7 +53,9 @@ public class SecurityConfig {
 
                 // 요청별 보안 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // 인증 관련 엔드포인트는 모두 허용
+                        .requestMatchers("/", "/api/auth/**").permitAll() // 인증 관련 엔드포인트는 모두 허용
+                        .requestMatchers("/api/questions/generate").permitAll() // 질문 생성 엔드포인트는 모두 허용
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // swagger 관련 엔드포인트는 모두 허용
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
 

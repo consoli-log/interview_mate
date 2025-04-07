@@ -35,7 +35,7 @@ public enum ErrorCode {
     UNSUPPORTED_TOKEN(UNAUTHORIZED, "지원되지 않는 JWT 토큰입니다."),
     INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 JWT 토큰입니다."),
     UNAUTHORIZED_ACCESS(UNAUTHORIZED, "인증되지 않은 접근입니다. 로그인 후 이용해 주세요."),
-    TOKEN_NOT_FOUND(UNAUTHORIZED, "Refresh Token을 찾을 수 없습니다."),
+    TOKEN_NOT_FOUND(NOT_FOUND, "Refresh Token을 찾을 수 없습니다."),
 
     // 인증 실패 관련 예외
     OAUTH2_PROVIDER_MISMATCH(CONFLICT, "해당 이메일은 다른 소셜 계정으로 이미 가입되어 있습니다."),
@@ -58,6 +58,11 @@ public enum ErrorCode {
     QUESTION_ALREADY_DEACTIVATED(BAD_REQUEST, "이미 비활성화된 질문입니다."),
     QUESTION_ACCESS_DENIED(FORBIDDEN, "해당 질문에 대한 권한이 없습니다."),
     QUESTION_REGENERATION_NOT_ALLOWED(BAD_REQUEST, "재생성할 수 있는 질문이 없습니다."),
+
+    // GEMINI 관련 예외
+    GEMINI_API_REQUEST_ERROR(INTERNAL_SERVER_ERROR, "Gemini API 요청 생성 중 오류가 발생했습니다."),
+    GEMINI_API_CALL_FAILED(INTERNAL_SERVER_ERROR, "Gemini API 호출 중 오류가 발생했습니다."),
+    GEMINI_API_RESPONSE_PARSE_ERROR(INTERNAL_SERVER_ERROR, "Gemini API 응답 파싱 중 오류가 발생했습니다."),
 
     // 공통 관련 예외
     LOGIN_REQUIRED(UNAUTHORIZED, "로그인이 필요한 기능입니다. 로그인 후 다시 시도해 주세요."),

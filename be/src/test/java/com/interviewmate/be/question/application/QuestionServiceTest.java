@@ -4,6 +4,8 @@ import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.infrastructure.openai.GeminiClient;
+import com.interviewmate.be.infrastructure.openai.dto.GeminiResponse;
+import com.interviewmate.be.infrastructure.openai.dto.GeminiResponse.QuestionItem;
 import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
 import com.interviewmate.be.prompt.application.PromptService;
@@ -92,16 +94,15 @@ class QuestionServiceTest {
     @DisplayName("비회원이 질문 생성 요청 시 저장 없이 결과만 응답한다")
     void generateQuestions_GuestUser_ReturnsQuestionsWithoutSaving() {
         // Given
-        List<String> generated = List.of("질문 1", "질문 2", "질문 3");
-        given(geminiClient.generateQuestions("프롬프트")).willReturn(generated);
-
+        GeminiResponse mockGeminiResponse = new GeminiResponse("제목", List.of(new QuestionItem("질문 1"), new QuestionItem("질문 2")));
+        given(geminiClient.generateQuestions("프롬프트")).willReturn(mockGeminiResponse);
         QuestionGenerateRequest request = new QuestionGenerateRequest("프롬프트");
 
         // When
         List<QuestionResponse> result = questionService.generateQuestions(request, null);
 
         // Then
-        assertThat(result).hasSize(3);
+        assertThat(result).hasSize(2);
         assertThat(result.get(0).question()).isEqualTo("질문 1");
         verify(questionRepository, never()).save(any());
     }
@@ -110,9 +111,9 @@ class QuestionServiceTest {
     @DisplayName("회원이 질문 생성 요청 시 프롬프트와 질문을 저장하고 응답한다")
     void generateQuestions_AuthenticatedUser_SavesPromptAndQuestions() {
         // Given
-        List<String> generated = List.of("질문 A", "질문 B");
-        given(geminiClient.generateQuestions(any())).willReturn(generated);
-        given(promptService.savePrompt(eq(mockUser), any())).willReturn(mockPrompt);
+        GeminiResponse mockGeminiResponse = new GeminiResponse("제목", List.of(new QuestionItem("질문 1"), new QuestionItem("질문 2")));
+        given(geminiClient.generateQuestions(any())).willReturn(mockGeminiResponse);
+        given(promptService.savePrompt(eq(mockUser), any(), any())).willReturn(mockPrompt);
         given(questionRepository.findMaxNumberByPrompt(mockPrompt)).willReturn(0);
         given(questionRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
@@ -124,7 +125,7 @@ class QuestionServiceTest {
         // Then
         assertThat(result).hasSize(2);
         assertThat(result.get(1).number()).isEqualTo(2);
-        assertThat(result.get(1).question()).isEqualTo("질문 B");
+        assertThat(result.get(1).question()).isEqualTo("질문 2");
         verify(questionRepository, times(2)).save(any());
     }
 
