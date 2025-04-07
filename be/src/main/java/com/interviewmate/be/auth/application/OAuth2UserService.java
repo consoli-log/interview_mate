@@ -55,13 +55,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         String email = userInfo.getEmail();
         String name = userInfo.getName();
 
-        // 1️⃣ 이메일로 사용자 존재 여부 확인
+        // 이메일로 사용자 존재 여부 확인
         Optional<User> sameEmailUser = userRepository.findByEmail(email);
 
         if (sameEmailUser.isPresent()) {
             User existingUser = sameEmailUser.get();
 
-            // 2️⃣ 이메일은 같지만 소셜 제공자가 다른 경우 예외 처리
+            // 이메일은 같지만 소셜 제공자가 다른 경우 예외 처리
             if (!existingUser.getProvider().equalsIgnoreCase(provider)) {
                 log.warn("소셜 제공자 불일치: 기존={}, 요청={}", existingUser.getProvider(), provider);
 
@@ -74,7 +74,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             return new OAuth2UserPrincipal(provider, oAuth2User); // 기존 사용자
         }
 
-        // 3️⃣ 신규 사용자 가입
+        // 신규 사용자 가입
         User newUser = User.builder()
                 .email(email)
                 .name(name)
