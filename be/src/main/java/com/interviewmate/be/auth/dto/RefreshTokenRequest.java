@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Access Token 재발급 요청 DTO")
 public class RefreshTokenRequest {
 
     @Schema(description = "사용자의 Refresh Token", example = "eyJhbGciOiJIUzI1...")
