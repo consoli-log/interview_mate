@@ -1,4 +1,4 @@
-package com.interviewmate.be.question.domain;
+package com.interviewmate.be.prompt.domain;
 
 import com.interviewmate.be.auth.domain.User;
 import jakarta.persistence.*;
@@ -12,7 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 /**
- * packageName    : com.interviewmate.be.question.domain
+ * packageName    : com.interviewmate.be.prompt.domain
  * fileName       : Prompt
  * author         : eumsoli
  * date           : 2025-03-24
@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "prompts")
 public class Prompt {
 
     @Id
@@ -29,7 +30,7 @@ public class Prompt {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_seq")
+    @JoinColumn(name = "user_seq", nullable = false)
     private User user; // 사용자와의 연관 관계
 
     @Column(nullable = false)
@@ -38,6 +39,9 @@ public class Prompt {
     @Lob
     @Column(nullable = false)
     private String prompt;
+
+    @Column(name = "is_active")
+    private boolean isActive; // 비활성화 여부
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -60,6 +64,15 @@ public class Prompt {
         this.user = user;
         this.title = title;
         this.prompt = prompt;
+        this.isActive = true;
+    }
+
+    /**
+     * methodName : deactivate
+     * description : 프롬프트를 비활성화 상태로 변경
+     */
+    public void deactivate() {
+        this.isActive = false;
     }
 
 }

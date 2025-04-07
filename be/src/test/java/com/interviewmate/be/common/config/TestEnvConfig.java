@@ -5,14 +5,14 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * packageName    : com.interviewmate.be.config
- * fileName       : EnvConfigTest
+ * fileName       : TestEnvConfig
  * author         : eumsoli
  * date           : 2025-03-21
  * description    : 테스트 환경에서 환경 변수 로드
  */
 
 @Configuration
-public class EnvConfigTest {
+public class TestEnvConfig {
 
     static {
         Dotenv dotenv = Dotenv.configure().load();

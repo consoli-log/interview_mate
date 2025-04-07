@@ -1,5 +1,7 @@
 package com.interviewmate.be.question.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 /**
@@ -9,8 +11,10 @@ import java.util.List;
  * date           : 2025-03-26
  * description    : 질문 목록 조회 응답 DTO
  */
+@Schema(description = "질문 목록 조회 응답 DTO")
 public record QuestionListResponse(
 
+        @Schema(description = "질문 리스트")
         List<QuestionResponse> questions // 질문 목록
 
 ) {}
