@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 @Schema(description = "질문 재생성 요청 DTO")
 public record QuestionRegenerateRequest(
 
-        @Schema(description = "프롬프트 ID", example = "1", required = true)
+        @Schema(description = "프롬프트 ID", example = "1")
         @NotNull(message = "프롬프트 ID는 필수입니다.")
         Long promptId // 재생성할 프롬프트
 

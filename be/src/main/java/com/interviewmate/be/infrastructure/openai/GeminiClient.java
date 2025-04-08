@@ -1,8 +1,7 @@
 package com.interviewmate.be.infrastructure.openai;
 
+import com.interviewmate.be.infrastructure.openai.dto.GeminiResponse;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * packageName    : com.interviewmate.be.infrastructure.openai
@@ -21,7 +20,7 @@ public interface GeminiClient {
      * @param prompt 프롬프트 내용
      * @return List<String> 생성된 질문 리스트
      */
-    List<String> generateQuestions(String prompt);
+    GeminiResponse generateQuestions(String prompt);
 
     /**
      * methodName : generateSingleQuestion

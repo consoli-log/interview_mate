@@ -30,34 +30,22 @@ public class PromptService {
 
     /**
      * methodName : savePrompt
-     * description : 프롬프트 저장 및 요약 제목 생성 처리
+     * description : Gemini로부터 받은 제목을 포함하여 프롬프트 저장
      *
      * @param user 사용자
-     * @param promptContent 사용자 입력 프롬프트
-     * @return Prompt 저장된 프롬프트 엔티티
+     * @param promptContent 프롬프트 내용
+     * @param title Gemini API로부터 생성된 요약 제목
+     * @return 저장된 Prompt 엔티티
      */
     @Transactional
-    public Prompt savePrompt(User user, String promptContent) {
-        String title = summarizeTitle(promptContent);
-
+    public Prompt savePrompt(User user, String promptContent, String title) {
         Prompt prompt = Prompt.builder()
                 .user(user)
-                .title(title)
                 .prompt(promptContent)
+                .title(title)
                 .build();
 
         return promptRepository.save(prompt);
-    }
-
-    /**
-     * methodName : summarizeTitle
-     * description : 임시 제목 생성 (앞 20자 잘라내기)
-     *
-     * @param prompt 프롬프트 내용
-     * @return 요약된 제목
-     */
-    private String summarizeTitle(String prompt) {
-        return prompt.length() > 20 ? prompt.substring(0, 20) + "..." : prompt;
     }
 
     /**

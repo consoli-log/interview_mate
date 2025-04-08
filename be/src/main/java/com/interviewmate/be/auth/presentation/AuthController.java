@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,29 +31,29 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "JWT 인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
 
     /**
-     * methodName : refreshToken
+     * methodName : refreshAccessToken
      * description : Refresh Token을 이용하여 새로운 Access Token 발급 API
      *
      * @param request Refresh Token 요청 DTO
      * @return 새로운 Access Token
      */
-    @PostMapping("/refresh")
     @Operation(
             summary = "Access Token 재발급",
             description = "Refresh Token을 이용하여 새로운 Access Token을 발급합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Access Token 재발급 성공"),
-                    @ApiResponse(responseCode = "400", description = "Refresh Token이 제공되지 않음"),
                     @ApiResponse(responseCode = "401", description = "유효하지 않은 Refresh Token"),
-                    @ApiResponse(responseCode = "404", description = "Refresh Token이 존재하지 않음")
+                    @ApiResponse(responseCode = "404", description = "Refresh Token을 찾을 수 없음")
             }
     )
-    public ResponseEntity<Map<String, String>> refreshToken(
+    @PostMapping("/refresh")
+    public ResponseEntity<Map<String, String>> refreshAccessToken(
             @RequestBody(description = "Refresh Token 요청 객체") RefreshTokenRequest request) {
         log.info("요청 받은 Refresh Token: {}", request.getRefreshToken());
 
@@ -73,8 +74,6 @@ public class AuthController {
      *
      * @param user 인증된 사용자 정보 (providerId 기반)
      */
-    @PostMapping("/logout")
-    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "로그아웃",
             description = """
@@ -83,10 +82,11 @@ public class AuthController {
                         """,
             responses = {
                     @ApiResponse(responseCode = "204", description = "로그아웃 성공"),
-                    @ApiResponse(responseCode = "400", description = "Refresh Token이 제공되지 않음"),
-                    @ApiResponse(responseCode = "401", description = "유효하지 않은 Refresh Token")
+                    @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
             }
     )
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal User user) {
         if (user == null) {
             log.warn("로그아웃 요청: 인증된 사용자 없음");

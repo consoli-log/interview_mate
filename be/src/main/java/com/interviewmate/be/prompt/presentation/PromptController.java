@@ -7,7 +7,6 @@ import com.interviewmate.be.prompt.application.PromptService;
 import com.interviewmate.be.prompt.dto.PromptListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +39,14 @@ public class PromptController {
      * @param user 로그인 사용자
      * @return ResponseEntity<List<PromptListResponse>> 프롬프트 목록 응답
      */
-    @Operation(summary = "프롬프트 목록 조회", description = "로그인 사용자의 프롬프트 목록을 조회한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "프롬프트 목록 조회 성공"),
-            @ApiResponse(responseCode = "401", description = "로그인 필요")
-    })
+    @Operation(
+            summary = "프롬프트 목록 조회",
+            description = "로그인 사용자의 프롬프트 목록을 조회한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "프롬프트 목록 조회 성공"),
+                    @ApiResponse(responseCode = "401", description = "로그인 필요")
+            }
+    )
     @GetMapping
     public ResponseEntity<List<PromptListResponse>> getPromptList(
             @AuthenticationPrincipal User user
@@ -66,13 +68,17 @@ public class PromptController {
      * @param user 로그인 사용자
      * @return ResponseEntity<Void> 204 No Content 응답
      */
-    @Operation(summary = "프롬프트 삭제", description = "프롬프트 및 연결된 질문들을 비활성화한다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "삭제 성공"),
-            @ApiResponse(responseCode = "401", description = "로그인 필요"),
-            @ApiResponse(responseCode = "403", description = "본인 소유 프롬프트 아님"),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 프롬프트")
-    })
+    @Operation(
+            summary = "프롬프트 삭제(비활성화)",
+            description = "프롬프트 및 연결된 질문들을 비활성화 처리합니다.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "프롬프트 삭제 성공"),
+                    @ApiResponse(responseCode = "400", description = "이미 비활성화 상태"),
+                    @ApiResponse(responseCode = "401", description = "로그인 필요"),
+                    @ApiResponse(responseCode = "403", description = "다른 사용자의 프롬프트"),
+                    @ApiResponse(responseCode = "404", description = "프롬프트를 찾을 수 없음")
+            }
+    )
     @DeleteMapping("/{promptId}")
     public ResponseEntity<Void> deactivatePrompt(
             @PathVariable Long promptId,

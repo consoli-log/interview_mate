@@ -8,6 +8,7 @@ import com.interviewmate.be.common.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "User", description = "사용자 관련 API")
 public class UserController {
 
     private final UserService userService;
@@ -43,13 +46,12 @@ public class UserController {
      * @return 사용자 정보 (email, name, providerId, provider)
      */
     @GetMapping("/me")
-    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "현재 로그인된 사용자 정보 조회",
             description = "JWT Access Token을 기반으로 현재 로그인한 사용자의 정보를 반환합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "사용자 정보 조회 성공"),
-                    @ApiResponse(responseCode = "401", description = "JWT 토큰이 유효하지 않음")
+                    @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
             }
     )
     public ResponseEntity<Map<String, Object>> getCurrentUser(@AuthenticationPrincipal User user) {
@@ -70,13 +72,13 @@ public class UserController {
 
     /**
      * methodName : deleteUser
-     * description : 회원 탈퇴 API - 현재 로그인된 사용자를 DB에서 삭제하고, Refresh Token도 Redis에서 제거
+     * description : 회원 탈퇴 API
+     *               현재 로그인된 사용자를 DB에서 삭제하고, Refresh Token도 Redis에서 제거
      *
      * @param user 현재 로그인된 사용자
      * @return 204 No Content
      */
     @DeleteMapping
-    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "회원 탈퇴",
             description = """
@@ -85,7 +87,8 @@ public class UserController {
                         """,
             responses = {
                     @ApiResponse(responseCode = "204", description = "회원 탈퇴 및 로그아웃 성공"),
-                    @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
+                    @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자"),
+                    @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
             }
     )
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal User user) {

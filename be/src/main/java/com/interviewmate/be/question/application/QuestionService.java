@@ -4,6 +4,8 @@ import com.interviewmate.be.auth.domain.User;
 import com.interviewmate.be.common.exception.CustomException;
 import com.interviewmate.be.common.exception.ErrorCode;
 import com.interviewmate.be.infrastructure.openai.GeminiClient;
+import com.interviewmate.be.infrastructure.openai.dto.GeminiResponse;
+import com.interviewmate.be.infrastructure.openai.dto.GeminiResponse.QuestionItem;
 import com.interviewmate.be.infrastructure.persistence.prompt.PromptRepository;
 import com.interviewmate.be.infrastructure.persistence.question.QuestionRepository;
 import com.interviewmate.be.prompt.application.PromptService;
@@ -47,22 +49,26 @@ public class QuestionService {
     @Transactional
     public List<QuestionResponse> generateQuestions(QuestionGenerateRequest request, User user) {
         // 질문 생성
-        List<String> generated = geminiClient.generateQuestions(request.prompt());
+        GeminiResponse geminiResponse = geminiClient.generateQuestions(request.prompt());
+        String title = geminiResponse.title();
 
-        // 비회원일 경우
-        if(user == null) {
-            return toResponse(generated, 1); // 저장 없이 그대로 응답만
+        List<String> generated = geminiResponse.questions().stream()
+                .map(QuestionItem::question)
+                .toList();
+
+        // 비회원은 저장 없이 응답만
+        if (user == null) {
+            return toResponse(generated, 1);
         }
 
-        // 회원일 경우
-        // 1. 프롬프트 저장
-        Prompt prompt = promptService.savePrompt(user, request.prompt());
+        // 프롬프트 저장 (제목 포함)
+        Prompt prompt = promptService.savePrompt(user, request.prompt(), title);
 
-        // 2. 현재 질문 번호 채번
+        // 질문 번호 채번
         int maxNumber = questionRepository.findMaxNumberByPrompt(prompt);
         int startNumber = maxNumber + 1;
 
-        // 3. 질문 저장
+        // 질문 저장
         List<Question> saved = new ArrayList<>();
 
         for(int i = 0; i < generated.size(); i++) {
@@ -93,7 +99,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
 
-        // 사용자 자신의 프롬프트인 지 확인
+        // 사용자 자신의 질문인 지 확인
         if (!question.getPrompt().getUser().getId().equals(user.getId())) {
             throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
         }
@@ -113,19 +119,20 @@ public class QuestionService {
      * @param request 질문 재생성 요청 DTO
      * @param user    로그인 사용자
      * @return QuestionResponse 생성된 질문 응답
+     * @throws CustomException 프롬프트 없음, 권한 없음, 재생성 불가 등의 예외 처리
      */
     @Transactional
     public QuestionResponse regenerateQuestion(QuestionRegenerateRequest request, User user) {
         Prompt prompt = promptRepository.findById(request.promptId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
+        // 사용자 자신의 프롬프트인 지 확인
         if (!prompt.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
+            throw new CustomException(ErrorCode.PROMPT_ACCESS_DENIED);
         }
 
         // 비활성화된 질문이 존재하는지 확인
         boolean hasInactive = questionRepository.existsByPromptAndIsActiveFalse(prompt);
-
         if (!hasInactive) {
             throw new CustomException(ErrorCode.QUESTION_REGENERATION_NOT_ALLOWED);
         }
@@ -136,8 +143,8 @@ public class QuestionService {
         int maxNumber = questionRepository.findMaxNumberByPrompt(prompt);
         Question question = Question.builder()
                 .prompt(prompt)
-                .question(newQuestion)
                 .number(maxNumber + 1)
+                .question(newQuestion)
                 .build();
 
         Question saved = questionRepository.save(question);
@@ -157,8 +164,9 @@ public class QuestionService {
         Prompt prompt = promptRepository.findById(promptId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
 
+        // 사용자 자신의 프롬프트인 지 확인
         if (!prompt.getUser().getId().equals(user.getId())) {
-            throw new CustomException(ErrorCode.QUESTION_ACCESS_DENIED);
+            throw new CustomException(ErrorCode.PROMPT_ACCESS_DENIED);
         }
 
         List<Question> questions = questionRepository.findAllByPromptAndIsActiveTrueOrderByNumber(prompt);
