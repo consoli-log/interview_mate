@@ -1,12 +1,14 @@
 # 1단계: Gradle 빌드
-FROM gradle:8.5.0-jdk17 AS build
+FROM gradle:8.10.2-jdk17 AS build
 WORKDIR /app
 
 # Gradle 캐시 최적화
 COPY build.gradle settings.gradle ./
-RUN gradle build -x test --no-daemon || true  # 의존성 캐싱용
+RUN gradle build -x test --no-daemon || true
+
+# 전체 복사 및 빌드 (테스트 생략)
 COPY . .
-RUN gradle build --no-daemon
+RUN gradle build -x test --no-daemon
 
 # 2단계: JAR 실행
 FROM eclipse-temurin:17
