@@ -13,6 +13,10 @@ java {
 	}
 }
 
+springBoot {
+	mainClass = 'com.interviewmate.be.BeApplication'
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
