@@ -54,7 +54,7 @@ spring:
             redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
 
 ---
-# 프로덕션 환경 설정
+# 개발 환경 설정
 spring:
   config:
     activate:
