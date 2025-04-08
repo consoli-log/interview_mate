@@ -39,3 +39,29 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-info-authentication-method: header # 토큰을 보내는 방법 header, form, query 중 header가 기본 값
             user_name_attribute: id # Kakao 응답 값 id, connected_at, properties, kakao_account 중 id 지정
+
+---
+# 로컬 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: local
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
+
+---
+# 프로덕션 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: dev
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            redirect-uri: "https://interview-mate-rmn5.onrender.com/login/oauth2/code/kakao"
