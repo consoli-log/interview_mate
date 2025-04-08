@@ -18,26 +18,24 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    private final String redisHost;
-    private final int redisPort;
+    private final String redisUrl;
 
     public RedisConfig(
-            @Value("${spring.data.redis.host}") String redisHost,
-            @Value("${spring.data.redis.port}") int redisPort
+            @Value("${spring.data.redis.url}") String redisUrl
     ) {
-        this.redisHost = redisHost;
-        this.redisPort = redisPort;
+        this.redisUrl = redisUrl;
     }
 
     /**
      * methodName : redisConnectionFactory
-     * description : Redis 연결 팩토리 설정
+     * description : Redis 연결 팩토리 설정 (URL 기반)
      *
      * @return RedisConnectionFactory Redis 연결 팩토리 객체
      */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        return new LettuceConnectionFactory(redisHost, redisPort);
+        return new LettuceConnectionFactory(
+                LettuceConnectionFactory.createRedisConfiguration(redisUrl));
     }
 
     /**
