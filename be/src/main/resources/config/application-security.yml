@@ -11,14 +11,14 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/callback/google" # 인증 후 사용자가 리디렉션될 URI
+            redirect-uri: "{baseUrl}/login/oauth2/code/google" # 인증 후 사용자가 리디렉션될 URI , /oauth2/authorization/google (요청)
             scope: # google API의 범위 값
               - profile
               - email
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/callback/kakao"
+            redirect-uri: "{baseUrl}/login/oauth2/code/kakao" # 인증 후 사용자가 리디렉션될 URI , /oauth2/authorization/kakao (요청)
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             scope: # kakao 개인 정보 동의 항목 설정의 ID 값
