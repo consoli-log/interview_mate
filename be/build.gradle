@@ -38,7 +38,7 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 	// db
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.postgresql:postgresql:42.7.3'
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
