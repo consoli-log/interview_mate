@@ -35,6 +35,7 @@ public class SwaggerConfig {
                         .version("v1.0")
                 )
                 .servers(List.of(
+                        new Server().url("https://interview-mate-rmn5.onrender.com").description("개발 서버"),
                         new Server().url("http://localhost:8080").description("로컬 서버")
                 ))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
