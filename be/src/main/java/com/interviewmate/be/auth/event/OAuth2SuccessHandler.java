@@ -1,6 +1,5 @@
 package com.interviewmate.be.auth.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.interviewmate.be.auth.application.TokenService;
 import com.interviewmate.be.auth.domain.OAuth2UserInfo;
 import com.interviewmate.be.auth.domain.OAuth2UserInfoFactory;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,7 +33,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * methodName : onAuthenticationSuccess
@@ -70,14 +69,23 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // Refresh Token을 Redis에 저장
         tokenService.saveRefreshToken(userInfo.getId(), refreshToken);
 
-        Map<String, String> tokenResponse = new HashMap<>();
-        tokenResponse.put("accessToken", accessToken);
-        tokenResponse.put("refreshToken", refreshToken);
+        // TODO: 실제 프론트 도메인 주소로 교체
+        String frontendBaseUri = "http://localhost:3000";
+        String callbackPath = switch (provider.toLowerCase()) {
+            case "google" -> "/api/auth/callback/google";
+            case "kakao" -> "/api/auth/callback/kakao";
+            default -> "/"; // fallback
+        };
 
-        // JSON 형태로 응답
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
+        String redirectUri = UriComponentsBuilder
+                .fromUriString(frontendBaseUri + callbackPath)
+                .queryParam("accessToken", accessToken)
+                .queryParam("refreshToken", refreshToken)
+                .build().toUriString();
+
+        log.info("로그인 성공 후 리디렉트 URI: {}", redirectUri);
+
+        response.sendRedirect(redirectUri);
     }
 
 }
