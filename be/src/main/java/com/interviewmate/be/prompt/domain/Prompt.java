@@ -36,8 +36,7 @@ public class Prompt {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String prompt;
 
     @Column(name = "is_active")

@@ -9,6 +9,7 @@ import com.interviewmate.be.prompt.domain.Prompt;
 import com.interviewmate.be.prompt.dto.PromptListResponse;
 import com.interviewmate.be.question.domain.Question;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.List;
  * date           : 2025-03-24
  * description    : 프롬프트 저장 및 관련 로직을 담당하는 서비스
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PromptService {
@@ -39,6 +41,8 @@ public class PromptService {
      */
     @Transactional
     public Prompt savePrompt(User user, String promptContent, String title) {
+        log.info("저장될 프롬프트: {}", promptContent);
+
         Prompt prompt = Prompt.builder()
                 .user(user)
                 .prompt(promptContent)

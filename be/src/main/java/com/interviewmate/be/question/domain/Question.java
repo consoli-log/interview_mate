@@ -36,8 +36,7 @@ public class Question {
     @Column(nullable = false)
     private int number; // 프롬프트 내 질문 번호 (1~5, 혹은 6...)
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String question; // 질문
 
     @Column(name = "is_active")
